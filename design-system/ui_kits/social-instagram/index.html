@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>Vena Digital — Social (Instagram)</title>
+  <link rel="stylesheet" href="../shared/components.css">
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body style="background: var(--vena-marfil-digital); padding: 32px;">
+  <div id="root"></div>
+  <script>window.VENA_ASSETS = '../../';</script>
+  <script type="text/babel" src="../shared/Brand.jsx"></script>
+  <script type="text/babel" src="Components.jsx"></script>
+  <script type="text/babel">
+    const Section = ({ tag, title, body, children }) => (
+      <section style={{ marginBottom: 48 }}>
+        <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 18 }}>
+          <div>
+            <span className="eyebrow-row">{tag}</span>
+            <h2 style={{ fontFamily: 'Manrope', fontSize: 32, fontWeight: 800, marginTop: 8, letterSpacing: '-0.02em' }}>{title}</h2>
+          </div>
+          <p style={{ maxWidth: 360, color: 'var(--fg-secondary)', fontSize: 14, lineHeight: 1.55 }}>{body}</p>
+        </div>
+        <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>{children}</div>
+      </section>
+    );
+    const App = () => (
+      <div data-screen-label="Social — Instagram templates" style={{ maxWidth: 1240, margin: '0 auto' }}>
+        <header style={{ marginBottom: 36, display: 'flex', alignItems: 'center', gap: 16 }}>
+          <LogoLockup mascotSize={48} wordSize={22}/>
+          <span style={{ marginLeft: 'auto', fontFamily: 'IBM Plex Mono', fontSize: 12, color: 'var(--fg-muted)', letterSpacing: '0.12em', textTransform: 'uppercase' }}>
+            Plantillas IG · 1080 × 1350 (mostradas al 50%)
+          </span>
+        </header>
+
+        <Section tag="EDUCATIVO" title="Carruseles paso a paso." body="Fondo claro, titular grande, una palabra clave en coral, mascota como apoyo, CTA tipo chip.">
+          <PostEducativo/>
+          <PostEducativo/>
+        </Section>
+
+        <Section tag="OPINIÓN" title="Frases que cortan el ruido." body="Fondo azul noche, foto de Laura, frase fuerte, subtexto corto. Pocos elementos.">
+          <PostOpinion/>
+          <PostOpinion/>
+        </Section>
+
+        <Section tag="LANZAMIENTO" title="Mascota en el centro." body="Mascota como elemento energético, CTA claro, amarillo para destacar, coral para acción.">
+          <PostLanzamiento/>
+          <PostLanzamiento/>
+        </Section>
+
+        <Section tag="STORY" title="9:16 para historias." body="Coral lleno, lockup blanco, swipe-up al final. Una sola idea.">
+          <Story/>
+          <Story/>
+          <Story/>
+          <Story/>
+        </Section>
+      </div>
+    );
+    ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+  </script>
+</body>
+</html>

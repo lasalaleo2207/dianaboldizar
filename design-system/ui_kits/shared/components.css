@@ -1,0 +1,175 @@
+/* Vena Digital — UI components (shared) */
+@import url('../../colors_and_type.css');
+
+* { box-sizing: border-box; }
+body { margin: 0; padding: 0; }
+
+/* ─── Buttons ───────────────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 24px;
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: 700;
+  border-radius: var(--radius-pill);
+  border: 0;
+  cursor: pointer;
+  transition: background var(--duration-base) var(--ease-standard),
+              color var(--duration-base) var(--ease-standard),
+              transform var(--duration-fast) var(--ease-standard),
+              box-shadow var(--duration-base) var(--ease-standard);
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+.btn:active { transform: translateY(1px); }
+.btn:focus-visible { outline: 3px solid var(--vena-amarillo-energia); outline-offset: 3px; }
+
+.btn-primary { background: var(--action-primary-bg); color: var(--action-primary-fg); }
+.btn-primary:hover { background: var(--action-primary-hover); }
+.btn-primary:active { background: var(--action-primary-press); }
+
+.btn-secondary { background: var(--action-secondary-bg); color: var(--action-secondary-fg); }
+.btn-secondary:hover { background: var(--action-secondary-hover); }
+.btn-secondary:active { background: var(--action-secondary-press); }
+
+.btn-tertiary {
+  background: var(--action-tertiary-bg);
+  color: var(--action-tertiary-fg);
+  box-shadow: inset 0 0 0 2px var(--action-tertiary-border);
+}
+.btn-tertiary:hover { background: var(--vena-marfil-digital); }
+
+.btn-highlight { background: var(--action-highlight-bg); color: var(--action-highlight-fg); }
+.btn-highlight:hover { background: #ECC02B; }
+
+.btn-icon-circle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.18);
+}
+.btn-tertiary .btn-icon-circle { background: var(--vena-coral-12); color: var(--vena-coral-accion); }
+
+/* ─── Tags / Chips ──────────────────────────────────────────── */
+.tag-mono {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: var(--radius-pill);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  background: var(--vena-coral-12);
+  color: var(--vena-coral-accion);
+}
+.tag-mono.azul   { background: var(--vena-azul-noche-08); color: var(--vena-azul-noche); }
+.tag-mono.verde  { background: #E5F1EC; color: var(--vena-verde-sistema); }
+.tag-mono.amarillo { background: var(--vena-amarillo-20); color: var(--vena-azul-noche); }
+.tag-mono.outline {
+  background: transparent;
+  color: var(--fg-secondary);
+  box-shadow: inset 0 0 0 1px var(--border-default);
+}
+
+/* ─── Card ──────────────────────────────────────────────────── */
+.card {
+  background: var(--bg-surface);
+  border-radius: var(--radius-card);
+  border: 1.5px solid var(--border-subtle);
+  padding: 24px;
+  transition: box-shadow var(--duration-base) var(--ease-standard);
+}
+.card.elevated { box-shadow: var(--shadow-2); border-color: transparent; }
+.card:hover.interactive { box-shadow: var(--shadow-3); }
+
+/* ─── Inputs ────────────────────────────────────────────────── */
+.input {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 12px 16px;
+  border-radius: var(--radius-input);
+  border: 1.5px solid var(--border-default);
+  background: var(--bg-surface);
+  font-family: var(--font-body);
+  font-size: 15px;
+  color: var(--fg-primary);
+  transition: border-color var(--duration-fast) var(--ease-standard),
+              box-shadow var(--duration-fast) var(--ease-standard);
+}
+.input:focus, .input:focus-within {
+  outline: 0;
+  border-color: var(--vena-azul-noche);
+  box-shadow: 0 0 0 4px var(--vena-azul-noche-08);
+}
+.input::placeholder { color: var(--fg-muted); }
+.input-icon { color: var(--fg-muted); flex-shrink: 0; }
+
+/* ─── Eyebrow ───────────────────────────────────────────────── */
+.eyebrow-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--vena-coral-accion);
+}
+.eyebrow-row::before {
+  content: '';
+  width: 9px; height: 9px;
+  border-radius: 50%;
+  border: 2px solid var(--vena-coral-accion);
+}
+
+/* ─── Mascot frame ──────────────────────────────────────────── */
+.mascot-frame {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 84px; height: 84px;
+  border-radius: 50%;
+  background: var(--vena-coral-accion);
+  border: 3px solid var(--vena-azul-noche);
+  overflow: hidden;
+}
+.mascot-frame.small { width: 48px; height: 48px; border-width: 2px; }
+.mascot-frame.large { width: 140px; height: 140px; border-width: 4px; }
+
+/* ─── Avatar ────────────────────────────────────────────────── */
+.avatar {
+  width: 48px; height: 48px;
+  border-radius: 50%;
+  background: var(--vena-gris-niebla);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: var(--vena-azul-noche);
+  overflow: hidden;
+}
+
+/* ─── Progress bar ──────────────────────────────────────────── */
+.progress {
+  width: 100%;
+  height: 8px;
+  border-radius: var(--radius-pill);
+  background: var(--vena-gris-niebla);
+  overflow: hidden;
+}
+.progress > .bar {
+  height: 100%;
+  border-radius: var(--radius-pill);
+  background: var(--vena-coral-accion);
+}

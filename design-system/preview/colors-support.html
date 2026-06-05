@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><title>Colors — Support</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  body { padding: 24px; background: var(--vena-marfil-digital); }
+  .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+  .swatch { display: flex; flex-direction: column; gap: 8px; }
+  .chip { width: 100%; aspect-ratio: 1.6/1; border-radius: 18px; border: 1.5px solid rgba(10,33,66,0.06); }
+  .name { font-family: var(--font-display); font-weight: 700; font-size: 14px; color: var(--vena-azul-noche); line-height: 1.2; }
+  .hex { font-family: var(--font-mono); font-size: 11px; color: var(--fg-muted); letter-spacing: 0.04em; }
+</style></head>
+<body>
+  <div class="grid">
+    <div class="swatch"><div class="chip" style="background:#BFD7EA"></div><div class="name">Azul suave</div><div class="hex">#BFD7EA</div></div>
+    <div class="swatch"><div class="chip" style="background:#2D2D2D"></div><div class="name">Gris carbón</div><div class="hex">#2D2D2D</div></div>
+    <div class="swatch"><div class="chip" style="background:#5FAE8B"></div><div class="name">Verde sistema</div><div class="hex">#5FAE8B</div></div>
+    <div class="swatch"><div class="chip" style="background:#F4A299"></div><div class="name">Coral suave</div><div class="hex">#F4A299</div></div>
+  </div>
+</body></html>

@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><title>Type — Families</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  body { padding: 24px; background: var(--vena-marfil-digital); }
+  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .card { background: #fff; border: 1.5px solid var(--border-subtle); border-radius: 20px; padding: 18px; }
+  .name { font-family: var(--font-display); font-weight: 700; font-size: 22px; color: var(--vena-azul-noche); }
+  .role { font-family: var(--font-body); font-size: 13px; color: var(--vena-coral-accion); margin-top: 4px; line-height: 1.35; }
+  .aa { font-family: inherit; font-size: 56px; font-weight: 700; color: var(--vena-azul-noche); margin-top: 14px; line-height: 1; letter-spacing: -0.02em; }
+  .weights { font-family: var(--font-mono); font-size: 11px; color: var(--fg-muted); margin-top: 6px; }
+  .manrope .name, .manrope .aa { font-family: 'Manrope', sans-serif; }
+  .dmsans  .name, .dmsans  .aa { font-family: 'DM Sans', sans-serif; }
+  .plex    .name, .plex    .aa { font-family: 'IBM Plex Mono', monospace; }
+</style></head>
+<body>
+  <div class="grid">
+    <div class="card manrope"><div class="name">Manrope</div><div class="role">Títulos y jerarquía</div><div class="aa">Aa</div><div class="weights">Bold · ExtraBold</div></div>
+    <div class="card dmsans"><div class="name">DM Sans</div><div class="role">Cuerpo y explicación</div><div class="aa">Aa</div><div class="weights">Regular · Medium</div></div>
+    <div class="card plex"><div class="name">IBM Plex Mono</div><div class="role">Etiquetas y acentos UI</div><div class="aa">Aa</div><div class="weights">Medium · SemiBold</div></div>
+  </div>
+</body></html>

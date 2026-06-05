@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="es">
+<head><meta charset="utf-8"><title>Mascota</title>
+<link rel="stylesheet" href="../ui_kits/shared/components.css">
+<style>
+  body { padding: 24px; background: var(--vena-marfil-digital); margin: 0; font-family: 'DM Sans'; }
+  .grid { display: grid; grid-template-columns: 1.1fr 0.95fr 0.95fr; gap: 14px; }
+  .cell { border-radius: 24px; padding: 20px; display: flex; flex-direction: column; gap: 10px; min-height: 200px; }
+  .cell.bg-azul  { background: var(--vena-azul-noche); color: #fff; }
+  .cell.bg-marfil { background: #fff; border: 1.5px solid var(--border-subtle); }
+  .cell.bg-amarillo { background: var(--vena-amarillo-energia); }
+  .label { font-family: 'IBM Plex Mono'; font-size: 11px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; opacity: 0.75; }
+  .row { flex: 1; display: flex; align-items: center; justify-content: center; gap: 12px; }
+  img { object-fit: contain; }
+</style></head>
+<body>
+  <div class="grid">
+    <div class="cell bg-marfil">
+      <span class="label">Mascota · cuerpo entero</span>
+      <div class="row"><img src="../assets/mascota.png" style="height: 150px;"></div>
+    </div>
+    <div class="cell bg-azul">
+      <span class="label" style="opacity: 0.85;">Sobre azul</span>
+      <div class="row"><img src="../assets/mascota.png" style="height: 130px;"></div>
+    </div>
+    <div class="cell bg-amarillo">
+      <span class="label" style="color: var(--vena-azul-noche);">Energía + paz</span>
+      <div class="row" style="position: relative;">
+        <img src="../assets/mascota.png" style="height: 130px;">
+        <span style="position: absolute; top: 0; right: 10px; background: var(--vena-coral-accion); color: #fff; padding: 6px 12px; border-radius: 999px; font-family: 'IBM Plex Mono'; font-size: 10px; font-weight: 600; letter-spacing: 0.12em; transform: rotate(6deg);">CLARO &gt; COMPLICADO</span>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

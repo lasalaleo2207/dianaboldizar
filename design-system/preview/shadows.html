@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><title>Shadows</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  body { padding: 28px; background: var(--vena-marfil-digital); }
+  .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
+  .item { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+  .box { width: 100%; aspect-ratio: 1.4/1; background: #fff; border-radius: 18px; }
+  .name { font-family: var(--font-display); font-weight: 700; font-size: 13px; color: var(--vena-azul-noche); }
+  .meta { font-family: var(--font-mono); font-size: 10px; color: var(--fg-muted); }
+</style></head>
+<body>
+  <div class="grid">
+    <div class="item"><div class="box" style="box-shadow: var(--shadow-1)"></div><div class="name">shadow-1</div><div class="meta">resting</div></div>
+    <div class="item"><div class="box" style="box-shadow: var(--shadow-2)"></div><div class="name">shadow-2</div><div class="meta">elevated</div></div>
+    <div class="item"><div class="box" style="box-shadow: var(--shadow-3)"></div><div class="name">shadow-3</div><div class="meta">hover</div></div>
+    <div class="item"><div class="box" style="box-shadow: var(--shadow-pop)"></div><div class="name">shadow-pop</div><div class="meta">modal</div></div>
+  </div>
+</body></html>

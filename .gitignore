@@ -1,0 +1,14 @@
+.next
+node_modules
+.env
+.env.local
+.vercel
+dist
+build
+npm-debug.log*
+.DS_Store
+*.zip
+
+# Local credentials
+Assets/client_secret*.json
+*client_secret*.json
