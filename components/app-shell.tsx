@@ -84,7 +84,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     <div className="app-shell">
       <aside className="sidebar">
         <Link className="brand-lockup" href="/dashboard">
-          <Image src="/brand/logo-horizontal.png" alt="Vena Digital" width={260} height={87} priority />
+          <Image src="/brand/logo-horizontal-cropped.png" alt="Vena Digital" width={471} height={215} priority />
         </Link>
 
         <nav className="nav-group" aria-label="Principal">
@@ -134,7 +134,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
       <main className="main">
         <div className="topbar">
-          <Image className="mobile-brand" src="/brand/logo-horizontal.png" alt="Vena Digital" width={220} height={74} style={{ height: "auto" }} />
+          <Image className="mobile-brand" src="/brand/logo-horizontal-cropped.png" alt="Vena Digital" width={471} height={215} style={{ height: "auto" }} />
           <div className="search">
             <Search size={18} />
             Buscar tareas, decisiones o entregables

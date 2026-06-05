@@ -122,7 +122,8 @@ p {
 }
 
 .brand-lockup img {
-  width: 148px;
+  width: 166px;
+  height: auto;
   max-width: 100%;
 }
 
