@@ -1,65 +1,72 @@
-import fs from "node:fs";
-import path from "node:path";
 import OpenAI from "openai";
 import { NextResponse } from "next/server";
 import { calculateSectionProgress, type IkigaiData } from "@/lib/ikigai-store";
 
 export const runtime = "nodejs";
 export const maxDuration = 120;
+const GENERATION_TIMEOUT_MS = 100_000;
 
 export async function POST(request: Request) {
-  const data = (await request.json()) as IkigaiData;
+  try {
+    const data = (await request.json()) as IkigaiData;
 
-  const sectionProgress = [
-    calculateSectionProgress(data.yo),
-    calculateSectionProgress(data.oferta),
-    calculateSectionProgress(data.mundo),
-    calculateSectionProgress(data.medio)
-  ];
+    const sectionProgress = [
+      calculateSectionProgress(data.yo),
+      calculateSectionProgress(data.oferta),
+      calculateSectionProgress(data.mundo),
+      calculateSectionProgress(data.medio)
+    ];
 
-  if (sectionProgress.some((value) => value < 100)) {
-    return NextResponse.json({ error: "Completa las cuatro etapas de Ikigai Clarity antes de generar la imagen." }, { status: 400 });
-  }
+    if (sectionProgress.some((value) => value < 100)) {
+      return NextResponse.json({ error: "Completa las cuatro etapas de Ikigai Clarity antes de generar la imagen." }, { status: 400 });
+    }
 
-  if (!process.env.OPENAI_API_KEY) {
-    return NextResponse.json({ error: "Falta OPENAI_API_KEY en .env.local." }, { status: 500 });
-  }
+    if (!process.env.OPENAI_API_KEY) {
+      return NextResponse.json({ error: "Falta OPENAI_API_KEY en .env.local." }, { status: 500 });
+    }
 
-  const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-  const prompt = buildPrompt(data);
-  const characterImage = readCharacterImage();
+    const client = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+      maxRetries: 0,
+      timeout: GENERATION_TIMEOUT_MS
+    });
+    const prompt = buildPrompt(data);
 
-  const response = await client.responses.create({
-    model: "gpt-5",
-    input: [
+    const response = await client.images.generate(
       {
-        role: "user",
-        content: [
-          { type: "input_text", text: prompt },
-          ...(characterImage ? [{ type: "input_image" as const, image_url: characterImage, detail: "high" as const }] : [])
-        ]
-      }
-    ],
-    tools: [
-      {
-        type: "image_generation",
+        model: "gpt-image-2",
+        prompt,
         size: "1536x1024",
-        quality: "high"
-      }
-    ],
-    tool_choice: { type: "image_generation" }
-  });
+        quality: "medium",
+        output_format: "png",
+        n: 1
+      },
+      { signal: AbortSignal.timeout(GENERATION_TIMEOUT_MS) }
+    );
 
-  const imageBase64 = response.output
-    .filter((output) => output.type === "image_generation_call")
-    .map((output) => output.result)
-    .find(Boolean);
+    const imageBase64 = response.data?.[0]?.b64_json;
 
-  if (!imageBase64) {
-    return NextResponse.json({ error: "OpenAI no devolvió una imagen." }, { status: 502 });
+    if (!imageBase64) {
+      return NextResponse.json({ error: "OpenAI no devolvió una imagen." }, { status: 502 });
+    }
+
+    return NextResponse.json({ imageBase64 });
+  } catch (error) {
+    console.error("Ikigai image generation error", error);
+    return NextResponse.json({ error: getGenerationErrorMessage(error) }, { status: 500 });
+  }
+}
+
+function getGenerationErrorMessage(error: unknown) {
+  if (error instanceof Error) {
+    if (error.name === "AbortError" || error.message.toLowerCase().includes("timeout")) {
+      return "OpenAI tardó demasiado generando la imagen. Intenta de nuevo en unos minutos.";
+    }
+
+    return `No se pudo generar la imagen: ${error.message}`;
   }
 
-  return NextResponse.json({ imageBase64 });
+  return "No se pudo generar la imagen por un error inesperado.";
 }
 
 function buildPrompt(data: IkigaiData) {
@@ -114,21 +121,10 @@ Activos actuales: ${formatList(data.medio.currentAssets)}
 Medios de venta efectivos: ${formatList(data.medio.effectiveSalesMedia)}
 Medios considerados: ${formatList(data.medio.consideredMedia)}
 
-Evita saturar la imagen. Sintetiza contenido largo en frases cortas, usa máximo 3 bullets por bloque si hay demasiada información.
+Evita saturar la imagen. Sintetiza contenido largo en frases cortas, usa máximo 3 bullets por bloque si hay demasiada información. Crea una ilustración editorial del personaje femenino profesional como figura lateral integrada, sin depender de una imagen de referencia externa.
 `;
 }
 
 function formatList(values: string[]) {
   return values.filter(Boolean).slice(0, 6).join("; ");
-}
-
-function readCharacterImage() {
-  const candidates = [
-    path.join(process.cwd(), "public", "assets", "diana-dibujo.png"),
-    path.join(process.cwd(), "Assets", "Diana_dibujo.png")
-  ];
-  const imagePath = candidates.find((candidate) => fs.existsSync(candidate));
-  if (!imagePath) return null;
-  const base64 = fs.readFileSync(imagePath).toString("base64");
-  return `data:image/png;base64,${base64}`;
 }

@@ -38,23 +38,43 @@ export function IkigaiOverview() {
     setMessage("Generando imagen...");
     setImageUrl(null);
 
-    const response = await fetch("/api/ikigai/generate-image", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(data)
-    });
-    const result = await response.json();
-    setIsGenerating(false);
+    const controller = new AbortController();
+    const timeoutId = window.setTimeout(() => controller.abort(), 105_000);
 
-    if (!response.ok) {
-      setMessage(result?.error ?? "No se pudo generar la imagen.");
-      return;
+    try {
+      const response = await fetch("/api/ikigai/generate-image", {
+        method: "POST",
+        signal: controller.signal,
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(data)
+      });
+      const result = await response.json().catch(() => null);
+
+      if (!response.ok) {
+        setMessage(result?.error ?? "No se pudo generar la imagen.");
+        return;
+      }
+
+      if (!result?.imageBase64) {
+        setMessage("La respuesta no incluyó una imagen.");
+        return;
+      }
+
+      setImageUrl(`data:image/png;base64,${result.imageBase64}`);
+      setMessage("Imagen generada con GPT Image 2.");
+    } catch (error) {
+      console.error("Ikigai image generation failed", error);
+      setMessage(
+        error instanceof DOMException && error.name === "AbortError"
+          ? "La generación superó el tiempo máximo. Intenta nuevamente."
+          : "No se pudo generar la imagen. Revisa la conexión o intenta de nuevo."
+      );
+    } finally {
+      window.clearTimeout(timeoutId);
+      setIsGenerating(false);
     }
-
-    setImageUrl(`data:image/png;base64,${result.imageBase64}`);
-    setMessage("Imagen generada.");
   }
 
   return (
