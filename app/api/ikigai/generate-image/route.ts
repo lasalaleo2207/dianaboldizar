@@ -1,11 +1,10 @@
 import { randomUUID } from "node:crypto";
-import OpenAI from "openai";
 import { NextResponse } from "next/server";
 import { calculateSectionProgress, type IkigaiData } from "@/lib/ikigai-store";
 
 export const runtime = "nodejs";
-export const maxDuration = 300;
-const GENERATION_TIMEOUT_MS = 240_000;
+export const maxDuration = 180;
+const GENERATION_TIMEOUT_MS = 150_000;
 const JOB_TTL_MS = 30 * 60_000;
 
 type GenerationJob = {
@@ -65,24 +64,36 @@ export async function GET(request: Request) {
 }
 
 async function generateImage(jobId: string, data: IkigaiData) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), GENERATION_TIMEOUT_MS);
+
   try {
-    const client = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY,
-      maxRetries: 0,
-      timeout: GENERATION_TIMEOUT_MS
-    });
-    const response = await client.images.generate(
-      {
+    const response = await fetch("https://api.openai.com/v1/images/generations", {
+      method: "POST",
+      signal: controller.signal,
+      headers: {
+        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
         model: "gpt-image-2",
         prompt: buildPrompt(data),
-        size: "1536x1024",
-        quality: "medium",
+        size: "1024x688",
+        quality: "low",
         output_format: "png",
         n: 1
-      },
-      { signal: AbortSignal.timeout(GENERATION_TIMEOUT_MS) }
-    );
-    const imageBase64 = response.data?.[0]?.b64_json;
+      })
+    });
+    const result = await response.json() as {
+      data?: Array<{ b64_json?: string }>;
+      error?: { message?: string; code?: string };
+    };
+
+    if (!response.ok) {
+      throw new Error(result.error?.message ?? `OpenAI respondió HTTP ${response.status}.`);
+    }
+
+    const imageBase64 = result.data?.[0]?.b64_json;
 
     if (!imageBase64) {
       throw new Error("OpenAI no devolvió una imagen.");
@@ -100,6 +111,8 @@ async function generateImage(jobId: string, data: IkigaiData) {
       createdAt: Date.now(),
       error: getGenerationErrorMessage(error)
     });
+  } finally {
+    clearTimeout(timeoutId);
   }
 }
 

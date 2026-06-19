@@ -39,7 +39,7 @@ export function IkigaiOverview() {
     setImageUrl(null);
 
     const controller = new AbortController();
-    const timeoutId = window.setTimeout(() => controller.abort(), 270_000);
+    const timeoutId = window.setTimeout(() => controller.abort(), 180_000);
 
     try {
       const response = await fetch("/api/ikigai/generate-image", {
