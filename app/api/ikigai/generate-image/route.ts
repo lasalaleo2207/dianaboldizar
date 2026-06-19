@@ -1,10 +1,21 @@
+import { randomUUID } from "node:crypto";
 import OpenAI from "openai";
 import { NextResponse } from "next/server";
 import { calculateSectionProgress, type IkigaiData } from "@/lib/ikigai-store";
 
 export const runtime = "nodejs";
-export const maxDuration = 120;
-const GENERATION_TIMEOUT_MS = 100_000;
+export const maxDuration = 300;
+const GENERATION_TIMEOUT_MS = 240_000;
+const JOB_TTL_MS = 30 * 60_000;
+
+type GenerationJob = {
+  status: "pending" | "completed" | "failed";
+  createdAt: number;
+  imageBase64?: string;
+  error?: string;
+};
+
+const generationJobs = new Map<string, GenerationJob>();
 
 export async function POST(request: Request) {
   try {
@@ -25,17 +36,45 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Falta OPENAI_API_KEY en .env.local." }, { status: 500 });
     }
 
+    cleanupExpiredJobs();
+    const jobId = randomUUID();
+    generationJobs.set(jobId, { status: "pending", createdAt: Date.now() });
+    void generateImage(jobId, data);
+
+    return NextResponse.json({ jobId }, { status: 202 });
+  } catch (error) {
+    console.error("Ikigai image job creation error", error);
+    return NextResponse.json({ error: getGenerationErrorMessage(error) }, { status: 500 });
+  }
+}
+
+export async function GET(request: Request) {
+  cleanupExpiredJobs();
+  const jobId = new URL(request.url).searchParams.get("jobId");
+  const job = jobId ? generationJobs.get(jobId) : null;
+
+  if (!job) {
+    return NextResponse.json({ error: "No se encontró la generación solicitada." }, { status: 404 });
+  }
+
+  return NextResponse.json({
+    status: job.status,
+    imageBase64: job.imageBase64,
+    error: job.error
+  });
+}
+
+async function generateImage(jobId: string, data: IkigaiData) {
+  try {
     const client = new OpenAI({
       apiKey: process.env.OPENAI_API_KEY,
       maxRetries: 0,
       timeout: GENERATION_TIMEOUT_MS
     });
-    const prompt = buildPrompt(data);
-
     const response = await client.images.generate(
       {
         model: "gpt-image-2",
-        prompt,
+        prompt: buildPrompt(data),
         size: "1536x1024",
         quality: "medium",
         output_format: "png",
@@ -43,17 +82,31 @@ export async function POST(request: Request) {
       },
       { signal: AbortSignal.timeout(GENERATION_TIMEOUT_MS) }
     );
-
     const imageBase64 = response.data?.[0]?.b64_json;
 
     if (!imageBase64) {
-      return NextResponse.json({ error: "OpenAI no devolvió una imagen." }, { status: 502 });
+      throw new Error("OpenAI no devolvió una imagen.");
     }
 
-    return NextResponse.json({ imageBase64 });
+    generationJobs.set(jobId, {
+      status: "completed",
+      createdAt: Date.now(),
+      imageBase64
+    });
   } catch (error) {
     console.error("Ikigai image generation error", error);
-    return NextResponse.json({ error: getGenerationErrorMessage(error) }, { status: 500 });
+    generationJobs.set(jobId, {
+      status: "failed",
+      createdAt: Date.now(),
+      error: getGenerationErrorMessage(error)
+    });
+  }
+}
+
+function cleanupExpiredJobs() {
+  const cutoff = Date.now() - JOB_TTL_MS;
+  for (const [jobId, job] of generationJobs) {
+    if (job.createdAt < cutoff) generationJobs.delete(jobId);
   }
 }
 

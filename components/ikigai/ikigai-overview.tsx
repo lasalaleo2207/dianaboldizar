@@ -39,7 +39,7 @@ export function IkigaiOverview() {
     setImageUrl(null);
 
     const controller = new AbortController();
-    const timeoutId = window.setTimeout(() => controller.abort(), 105_000);
+    const timeoutId = window.setTimeout(() => controller.abort(), 270_000);
 
     try {
       const response = await fetch("/api/ikigai/generate-image", {
@@ -57,13 +57,37 @@ export function IkigaiOverview() {
         return;
       }
 
-      if (!result?.imageBase64) {
-        setMessage("La respuesta no incluyó una imagen.");
+      if (!result?.jobId) {
+        setMessage("No se pudo iniciar la generación.");
         return;
       }
 
-      setImageUrl(`data:image/png;base64,${result.imageBase64}`);
-      setMessage("Imagen generada con GPT Image 2.");
+      setMessage("Generando con GPT Image 2. Puede tardar unos minutos...");
+
+      while (!controller.signal.aborted) {
+        await wait(2500);
+        const statusResponse = await fetch(
+          `/api/ikigai/generate-image?jobId=${encodeURIComponent(result.jobId)}`,
+          { signal: controller.signal }
+        );
+        const statusResult = await statusResponse.json().catch(() => null);
+
+        if (!statusResponse.ok) {
+          setMessage(statusResult?.error ?? "No se pudo consultar la generación.");
+          return;
+        }
+
+        if (statusResult?.status === "failed") {
+          setMessage(statusResult.error ?? "OpenAI no pudo generar la imagen.");
+          return;
+        }
+
+        if (statusResult?.status === "completed" && statusResult.imageBase64) {
+          setImageUrl(`data:image/png;base64,${statusResult.imageBase64}`);
+          setMessage("Imagen generada con GPT Image 2.");
+          return;
+        }
+      }
     } catch (error) {
       console.error("Ikigai image generation failed", error);
       setMessage(
@@ -141,4 +165,8 @@ export function IkigaiOverview() {
 
     </div>
   );
+}
+
+function wait(milliseconds: number) {
+  return new Promise((resolve) => window.setTimeout(resolve, milliseconds));
 }
