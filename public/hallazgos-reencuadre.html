@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Diana · Arquitectura Estratégica</title>
+<style>
+  :root{
+    --azul:#0A2142;
+    --azul-2:#13315c;
+    --coral:#FF6B5E;
+    --amarillo:#F5C935;
+    --verde:#2BB89B;
+    --gris:#6b7280;
+    --gris-claro:#eef1f6;
+    --blanco:#ffffff;
+    --sombra:0 10px 30px rgba(10,33,66,.10);
+    --sombra-fuerte:0 18px 50px rgba(10,33,66,.18);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:Arial, Helvetica, sans-serif;
+    color:var(--azul);
+    background:linear-gradient(180deg,#f7f9fc 0%, #eef1f6 100%);
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1080px;margin:0 auto;padding:0 22px}
+
+  /* NAV */
+  nav{
+    position:sticky;top:0;z-index:50;
+    background:rgba(10,33,66,.96);backdrop-filter:blur(6px);
+    border-bottom:3px solid var(--coral);
+  }
+  nav .wrap{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:10px 22px}
+  nav .brand{color:#fff;font-weight:bold;font-size:15px;letter-spacing:.5px;margin-right:auto}
+  nav .brand span{color:var(--amarillo)}
+  nav a{
+    color:#cdd6e6;text-decoration:none;font-size:12.5px;font-weight:bold;
+    padding:7px 11px;border-radius:20px;transition:.2s;white-space:nowrap;
+  }
+  nav a:hover{background:rgba(255,255,255,.10);color:#fff}
+
+  /* HERO */
+  header.hero{padding:64px 0 30px;text-align:center}
+  header.hero .kicker{
+    display:inline-block;background:var(--amarillo);color:var(--azul);
+    font-weight:bold;font-size:12px;letter-spacing:2px;padding:6px 14px;border-radius:30px;text-transform:uppercase
+  }
+  header.hero h1{font-size:46px;line-height:1.05;margin:18px 0 10px;letter-spacing:-1px}
+  header.hero h1 b{color:var(--coral)}
+  header.hero p.sub{font-size:18px;color:var(--gris);max-width:680px;margin:0 auto}
+
+  section{padding:46px 0}
+  .sec-label{display:flex;align-items:center;gap:12px;margin-bottom:6px}
+  .sec-num{
+    background:var(--azul);color:#fff;width:34px;height:34px;border-radius:50%;
+    display:grid;place-items:center;font-weight:bold;font-size:15px;flex:none
+  }
+  h2{font-size:30px;letter-spacing:-.5px}
+  .sec-desc{color:var(--gris);margin:6px 0 26px;font-size:16px;max-width:760px}
+
+  /* TOGGLE DIAGNÓSTICO */
+  .toggle{display:inline-flex;background:var(--gris-claro);border-radius:40px;padding:5px;margin-bottom:26px;gap:4px}
+  .toggle button{
+    border:0;background:transparent;padding:10px 22px;border-radius:34px;cursor:pointer;
+    font-weight:bold;font-size:14px;color:var(--gris);font-family:inherit;transition:.2s
+  }
+  .toggle button.on{background:var(--azul);color:#fff;box-shadow:var(--sombra)}
+  .toggle button.on.problema{background:var(--coral)}
+
+  .panel{display:none;animation:fade .4s ease}
+  .panel.show{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  /* HOY scatter */
+  .scatter{
+    position:relative;background:var(--blanco);border-radius:20px;box-shadow:var(--sombra);
+    padding:34px 26px;border:1px dashed #d6431f33
+  }
+  .scatter .center-empty{
+    text-align:center;border:2px dashed var(--coral);border-radius:16px;
+    padding:18px;max-width:340px;margin:0 auto 24px;color:var(--coral);font-weight:bold
+  }
+  .chips{display:flex;flex-wrap:wrap;gap:12px;justify-content:center}
+  .chip{
+    background:#fff;border:1.5px solid var(--gris-claro);border-radius:14px;padding:12px 16px;
+    font-size:13.5px;font-weight:bold;box-shadow:0 4px 10px rgba(10,33,66,.05);position:relative;transition:.2s
+  }
+  .chip:hover{transform:translateY(-3px);box-shadow:var(--sombra)}
+  .chip .tag{
+    display:block;font-size:10px;font-weight:bold;letter-spacing:1px;margin-top:5px;
+  }
+  .chip.b2c .tag{color:var(--coral)}
+  .chip.b2b .tag{color:var(--azul-2)}
+  .diag-note{margin-top:22px;display:flex;gap:14px;flex-wrap:wrap}
+  .diag-note .n{flex:1;min-width:220px;background:#fff5f4;border-left:4px solid var(--coral);padding:14px 16px;border-radius:0 10px 10px 0;font-size:14px}
+  .diag-note .n b{color:var(--coral)}
+
+  /* ENFOQUE */
+  .ancla{
+    background:linear-gradient(135deg,var(--azul) 0%, var(--azul-2) 100%);
+    color:#fff;border-radius:22px;padding:34px 32px;box-shadow:var(--sombra-fuerte);position:relative;overflow:hidden
+  }
+  .ancla::after{content:"";position:absolute;right:-40px;top:-40px;width:180px;height:180px;border-radius:50%;background:rgba(245,201,53,.14)}
+  .ancla .lbl{color:var(--amarillo);font-weight:bold;font-size:12px;letter-spacing:2px;text-transform:uppercase}
+  .ancla p{font-size:25px;line-height:1.35;margin-top:12px;font-weight:bold;position:relative;z-index:1}
+  .ancla p .hi{color:var(--amarillo)}
+  .ancla p .hc{color:var(--coral)}
+
+  .two-cards{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:22px}
+  .lcard{background:#fff;border-radius:18px;padding:24px;box-shadow:var(--sombra);border-top:5px solid}
+  .lcard.interior{border-color:var(--coral)}
+  .lcard.comu{border-color:var(--verde)}
+  .lcard h3{font-size:19px;margin-bottom:4px}
+  .lcard .role{font-size:11px;font-weight:bold;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px}
+  .lcard.interior .role{color:var(--coral)}
+  .lcard.comu .role{color:var(--verde)}
+  .lcard p{font-size:14.5px;color:#34435c}
+
+  .audience{
+    margin-top:18px;background:#fff;border-radius:18px;padding:24px;box-shadow:var(--sombra);
+    display:flex;gap:20px;align-items:center;flex-wrap:wrap
+  }
+  .audience .ico{width:64px;height:64px;border-radius:50%;background:var(--amarillo);display:grid;place-items:center;font-size:30px;flex:none}
+  .audience h3{font-size:19px;margin-bottom:4px}
+  .audience p{font-size:14.5px;color:#34435c;max-width:640px}
+  .audience .moments{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+  .audience .moments span{background:var(--gris-claro);font-size:12px;font-weight:bold;padding:5px 11px;border-radius:20px}
+  .audience .moments span b{color:var(--coral)}
+
+  /* MÉTODO columna */
+  .metodo-hero{
+    background:#fff;border-radius:22px;box-shadow:var(--sombra);padding:30px;
+    display:grid;grid-template-columns:auto 1fr;gap:26px;align-items:center
+  }
+  .spine{
+    width:120px;text-align:center
+  }
+  .spine .target{width:120px;height:120px;border-radius:50%;margin:0 auto;position:relative;
+    background:
+      radial-gradient(circle, var(--amarillo) 0 14%, #fff 14% 26%, var(--coral) 26% 42%, #fff 42% 56%, var(--azul) 56% 74%, #fff 74% 86%, var(--azul-2) 86% 100%);
+    box-shadow:var(--sombra)}
+  .spine .name{margin-top:12px;font-weight:bold;font-size:22px;color:var(--azul)}
+  .spine .name span{color:var(--coral)}
+  .spine .estado{display:inline-block;margin-top:6px;font-size:10px;font-weight:bold;letter-spacing:1px;background:var(--amarillo);color:var(--azul);padding:4px 9px;border-radius:14px}
+  .metodo-hero .txt h3{font-size:20px;margin-bottom:8px}
+  .metodo-hero .txt p{font-size:15px;color:#34435c;margin-bottom:10px}
+  .metodo-hero .txt .cascada{display:flex;gap:8px;flex-wrap:wrap}
+  .metodo-hero .txt .cascada span{background:var(--gris-claro);font-size:12px;font-weight:bold;padding:6px 11px;border-radius:8px}
+
+  /* ESCALERA */
+  .ladder-wrap{display:grid;grid-template-columns:1.1fr 1fr;gap:22px;align-items:start}
+  .ladder{display:flex;flex-direction:column-reverse;gap:10px}
+  .step{
+    background:#fff;border-radius:14px;padding:15px 18px;box-shadow:var(--sombra);cursor:pointer;
+    display:flex;align-items:center;gap:14px;border-left:5px solid var(--gris-claro);transition:.2s;text-align:left;font-family:inherit;width:100%
+  }
+  .step:hover{transform:translateX(4px)}
+  .step.active{border-left-color:var(--coral);box-shadow:var(--sombra-fuerte)}
+  .step .lvl{font-size:11px;font-weight:bold;color:var(--gris);letter-spacing:1px}
+  .step h4{font-size:15.5px}
+  .step .depthbar{height:6px;background:var(--gris-claro);border-radius:6px;margin-top:7px;overflow:hidden;max-width:160px}
+  .step .depthbar i{display:block;height:100%;background:var(--coral);border-radius:6px}
+  .step .price{margin-left:auto;font-size:11px;font-weight:bold;color:var(--azul-2);white-space:nowrap}
+
+  .detail{
+    background:linear-gradient(135deg,var(--azul) 0%, var(--azul-2) 100%);color:#fff;border-radius:18px;padding:26px;
+    box-shadow:var(--sombra-fuerte);position:sticky;top:80px;min-height:230px
+  }
+  .detail .step-name{color:var(--amarillo);font-weight:bold;font-size:12px;letter-spacing:1.5px;text-transform:uppercase}
+  .detail h3{font-size:23px;margin:8px 0}
+  .detail .meta{display:flex;gap:18px;margin:14px 0;flex-wrap:wrap}
+  .detail .meta div{font-size:12px;color:#aebbd2}
+  .detail .meta div b{display:block;color:#fff;font-size:15px;margin-top:2px}
+  .detail .desc{font-size:14.5px;color:#dde4f0;border-top:1px solid rgba(255,255,255,.15);padding-top:14px}
+  .detail .depth-meter{margin-top:14px}
+  .detail .depth-meter .l{font-size:11px;color:#aebbd2;font-weight:bold;letter-spacing:1px}
+  .detail .depth-meter .bar{height:9px;background:rgba(255,255,255,.16);border-radius:8px;margin-top:6px;overflow:hidden}
+  .detail .depth-meter .bar i{display:block;height:100%;background:var(--amarillo);border-radius:8px;transition:width .5s ease}
+
+  /* DIFUSIÓN */
+  .difu-banner{background:#fffbe9;border:1.5px dashed var(--amarillo);border-radius:14px;padding:14px 18px;font-size:14px;margin-bottom:20px}
+  .difu-banner b{color:#9a7a00}
+  .difu{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  .dstep{background:#fff;border-radius:18px;padding:22px;box-shadow:var(--sombra);text-align:center;position:relative}
+  .dstep .ico{width:56px;height:56px;border-radius:50%;display:grid;place-items:center;margin:0 auto 12px;font-size:26px}
+  .dstep:nth-child(1) .ico{background:#ffe9e7}
+  .dstep:nth-child(2) .ico{background:#e7f7f2}
+  .dstep:nth-child(3) .ico{background:#fff6d6}
+  .dstep h4{font-size:17px}
+  .dstep .org{font-size:11px;font-weight:bold;letter-spacing:1px;text-transform:uppercase;color:var(--coral);margin:4px 0 8px}
+  .dstep p{font-size:13.5px;color:#34435c}
+  .dstep .arrow{position:absolute;right:-18px;top:50%;transform:translateY(-50%);font-size:22px;color:var(--coral);z-index:2}
+  .dstep:last-child .arrow{display:none}
+
+  /* PENDIENTES */
+  .pend{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  .pcard{background:#fff;border-radius:16px;padding:22px;box-shadow:var(--sombra);border-top:4px solid var(--azul)}
+  .pcard .when{font-size:11px;font-weight:bold;letter-spacing:1px;text-transform:uppercase;color:var(--gris)}
+  .pcard.now{border-top-color:var(--coral)}
+  .pcard.now .when{color:var(--coral)}
+  .pcard h4{font-size:16px;margin:6px 0 8px}
+  .pcard p{font-size:13.5px;color:#34435c}
+
+  footer{background:var(--azul);color:#aebbd2;text-align:center;padding:30px;font-size:13px;margin-top:40px}
+  footer b{color:var(--amarillo)}
+
+  @media(max-width:780px){
+    header.hero h1{font-size:34px}
+    .two-cards,.ladder-wrap,.difu,.pend{grid-template-columns:1fr}
+    .metodo-hero{grid-template-columns:1fr;text-align:center}
+    .detail{position:static}
+    .dstep .arrow{display:none}
+    nav .brand{width:100%;margin-bottom:6px}
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <div class="brand">DIANA · <span>Arquitectura Estratégica</span></div>
+    <a href="#hoy">El problema</a>
+    <a href="#enfoque">El enfoque</a>
+    <a href="#metodo">El método</a>
+    <a href="#oferta">La oferta</a>
+    <a href="#difusion">Difusión</a>
+    <a href="#pendientes">Pendientes</a>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap">
+    <span class="kicker">Reencuadre de marca y oferta</span>
+    <h1>De una oferta dispersa<br>a <b>un solo centro</b></h1>
+    <p class="sub">Llevo a Diana de seis servicios sin hilo conductor a una propuesta integrada, con un método como columna vertebral. Este es el resumen vivo de lo que venimos definiendo.</p>
+  </div>
+</header>
+
+<!-- 1. EL PROBLEMA -->
+<section id="hoy">
+  <div class="wrap">
+    <div class="sec-label"><div class="sec-num">1</div><h2>El diagnóstico</h2></div>
+    <p class="sec-desc">En mi lectura, hoy la oferta de Diana está fragmentada: servicios que apuntan a públicos distintos (B2C y B2B), sin un eje que los una. Con el interruptor comparo cómo está hoy y hacia dónde la llevo.</p>
+
+    <div class="toggle">
+      <button id="btnProblema" class="on problema" onclick="showPanel('problema')">⚠ Cómo está HOY</button>
+      <button id="btnEnfoque" onclick="showPanel('enfoque')">✓ Hacia dónde va</button>
+    </div>
+
+    <div id="panel-problema" class="panel show">
+      <div class="scatter">
+        <div class="center-empty">SIN CENTRO<br><span style="font-weight:normal;font-size:13px;color:var(--gris)">Nada conecta una oferta con la otra</span></div>
+        <div class="chips">
+          <div class="chip b2c">db Publishing<span class="tag">B2C</span></div>
+          <div class="chip b2c">Cursos Online · "De Invisible a Inolvidable"<span class="tag">B2C</span></div>
+          <div class="chip b2c">Libro · 7 Estrategias para Ser Exitosa<span class="tag">B2C</span></div>
+          <div class="chip b2b">Consultoría · Comunicación estratégica<span class="tag">B2B</span></div>
+          <div class="chip b2b">Capacitaciones empresariales<span class="tag">B2B</span></div>
+          <div class="chip b2c">Entrenamiento personalizado<span class="tag">B2C</span></div>
+        </div>
+        <div class="diag-note">
+          <div class="n"><b>Públicos cruzados.</b> B2C y B2B en la misma oferta. Dos buyer personas que no se hablan.</div>
+          <div class="n"><b>Sin jerarquía.</b> Seis servicios al mismo nivel; ninguno es la puerta de entrada.</div>
+          <div class="n"><b>Sin método.</b> Cada servicio vive solo, sin un sistema que los conecte y los diferencie.</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="panel-enfoque" class="panel">
+      <div class="scatter" style="border-style:solid;border-color:#2bb89b33">
+        <div class="center-empty" style="border-color:var(--verde);color:var(--verde)">UN CENTRO<br><span style="font-weight:normal;font-size:13px;color:var(--gris)">Un método ordena toda la oferta</span></div>
+        <p style="text-align:center;color:#34435c;font-size:15px;max-width:620px;margin:0 auto">
+          Un solo público, una transformación clara y una escalera de productos que sube en profundidad.
+          <b>Descarto el B2B</b> para que Diana pueda enfocarse y centrar toda su energía en esta oferta. El detalle, abajo. ↓
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 2. EL ENFOQUE -->
+<section id="enfoque" style="background:#fff">
+  <div class="wrap">
+    <div class="sec-label"><div class="sec-num">2</div><h2>El enfoque integrado</h2></div>
+    <p class="sec-desc">Para mí, la pieza que amarra todo es la transformación que Diana vende: une el trabajo interior (su diferenciador) con un resultado comercial concreto (lo que la clienta compra).</p>
+
+    <div class="ancla">
+      <span class="lbl">★ El ancla · la promesa central</span>
+      <p>Rompo la <span class="hc">barrera interna que te tiene invisible</span> para que <span class="hi">comuniques y vendas lo que vales</span> como emprendedora.</p>
+    </div>
+
+    <div class="two-cards">
+      <div class="lcard interior">
+        <div class="role">La profundidad · el diferenciador</div>
+        <h3>Trabajo interior</h3>
+        <p>El trabajo de seguridad, confianza y ruptura de creencias limitantes es lo que hace que el método se sienta distinto y difícil de copiar. Por sí solo no se vende —nadie paga por "ganar confianza"—, pero es lo que sostiene todo lo demás.</p>
+      </div>
+      <div class="lcard comu">
+        <div class="role">El resultado · lo que se compra</div>
+        <h3>Comunicación &amp; visibilidad comercial</h3>
+        <p>Diana tiene expertise en comunicación, y ese es el terreno donde la clienta consigue un resultado concreto: comunicar su valor, mostrarse y vender. Aquí el trabajo interior se vuelve un resultado de negocio tangible, y por eso se puede cobrar.</p>
+      </div>
+    </div>
+
+    <div class="audience">
+      <div class="ico">👩‍💼</div>
+      <div>
+        <h3>Un solo público</h3>
+        <p>Diana se enfoca en mujeres emprendedoras estancadas que se sienten invisibles. No son dos audiencias distintas: es <b>la misma persona en dos momentos</b> del mismo camino.</p>
+        <div class="moments">
+          <span><b>Momento 1 ·</b> gana confianza y aprende a comunicar y vender lo que vale</span>
+          <span><b>Momento 2 ·</b> cuenta su historia / da a conocer su negocio a través del libro</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 3. EL MÉTODO -->
+<section id="metodo">
+  <div class="wrap">
+    <div class="sec-label"><div class="sec-num">3</div><h2>El método: la columna vertebral</h2></div>
+    <p class="sec-desc">"La Diana" no es un producto más: es el sistema que enmarca todo lo que ella hace, desde su presencia de marca hasta cada producto de la oferta, aplicado a más profundidad a medida que sube la escalera.</p>
+
+    <div class="metodo-hero">
+      <div class="spine">
+        <div class="target"></div>
+        <div class="name">La <span>Diana</span></div>
+        <div class="estado">EN DESARROLLO</div>
+      </div>
+      <div class="txt">
+        <h3>Un método con nombre, dar en el centro</h3>
+        <p>El nombre juega con la triple lectura: Diana (la persona), el método, y la <i>diana</i> (el blanco). El concepto aún está por desarrollar — es la prioridad, porque sostiene toda la arquitectura. Debe nacer dentro del contexto de la emprendedora estancada, no en abstracto, para que no suene a desarrollo personal genérico.</p>
+        <div class="cascada">
+          <span>Presencia de marca</span><span>→ Libro</span><span>→ Curso</span><span>→ Programa grupal</span><span>→ Mentoría 1:1</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 4. LA OFERTA -->
+<section id="oferta" style="background:#fff">
+  <div class="wrap">
+    <div class="sec-label"><div class="sec-num">4</div><h2>La escalera de oferta</h2></div>
+    <p class="sec-desc">Un mismo método aplicado a distinta profundidad y precio. Cada peldaño muestra cómo se aplica — clic para ver el detalle.</p>
+
+    <div class="ladder-wrap">
+      <div class="ladder">
+        <button class="step" data-step="0" onclick="selectStep(0)">
+          <div><div class="lvl">PUERTA DE ENTRADA</div><h4>Libro · 7 Estrategias para Ser Exitosa</h4><div class="depthbar"><i style="width:25%"></i></div></div>
+          <div class="price">$</div>
+        </button>
+        <button class="step" data-step="1" onclick="selectStep(1)">
+          <div><div class="lvl">ESCALA</div><h4>Curso evergreen · De invisible a inolvidable</h4><div class="depthbar"><i style="width:50%"></i></div></div>
+          <div class="price">$$</div>
+        </button>
+        <button class="step" data-step="2" onclick="selectStep(2)">
+          <div><div class="lvl">PROFUNDIDAD</div><h4>Programa grupal · método La Diana</h4><div class="depthbar"><i style="width:75%"></i></div></div>
+          <div class="price">$$$</div>
+        </button>
+        <button class="step" data-step="3" onclick="selectStep(3)">
+          <div><div class="lvl">MÁXIMA PROFUNDIDAD</div><h4>Mentoría premium 1:1 · "Tu libro con propósito"</h4><div class="depthbar"><i style="width:100%"></i></div></div>
+          <div class="price">$$$$</div>
+        </button>
+      </div>
+
+      <div class="detail" id="detail">
+        <!-- JS rellena -->
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 5. DIFUSIÓN -->
+<section id="difusion">
+  <div class="wrap">
+    <div class="sec-label"><div class="sec-num">5</div><h2>El embudo de difusión</h2></div>
+    <p class="sec-desc">Así ordeno la presencia de marca de Diana. Cada medio cumple un rol distinto en construir visibilidad y vínculo.</p>
+
+    <div class="difu-banner">⚠ Esto es un embudo de <b>DIFUSIÓN y presencia</b>, no de conversión. El funnel comercial de ventas se diseña más adelante, en otra fase.</div>
+
+    <div class="difu">
+      <div class="dstep">
+        <div class="ico">📱</div>
+        <h4>Instagram</h4>
+        <div class="org">Alcance</div>
+        <p>El medio más masivo. Donde la emprendedora descubre a Diana por primera vez.</p>
+        <div class="arrow">→</div>
+      </div>
+      <div class="dstep">
+        <div class="ico">🎙️</div>
+        <h4>Podcast</h4>
+        <div class="org">Confianza · recordación</div>
+        <p>Quien ya la conoce profundiza. La voz genera cercanía y la vuelve memorable.</p>
+        <div class="arrow">→</div>
+      </div>
+      <div class="dstep">
+        <div class="ico">💌</div>
+        <h4>Newsletter / Comunidad</h4>
+        <div class="org">Vínculo · dato propio</div>
+        <p>El canal más íntimo: contacto uno a uno. Aún por definir su forma exacta.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 6. PENDIENTES -->
+<section id="pendientes" style="background:#fff">
+  <div class="wrap">
+    <div class="sec-label"><div class="sec-num">6</div><h2>Lo que sigue</h2></div>
+    <p class="sec-desc">El orden importa: primero el método, y de ahí cae en cascada todo lo demás.</p>
+
+    <div class="pend">
+      <div class="pcard now">
+        <div class="when">▶ Ahora · prioridad</div>
+        <h4>Desarrollo conceptual del método</h4>
+        <p>Definir en qué consiste "La Diana" — sus fases, principios y cómo se aplica. Construir una metodología para ponerlo sobre el papel, anclado al nicho de la emprendedora estancada.</p>
+      </div>
+      <div class="pcard">
+        <div class="when">Después del método</div>
+        <h4>Frase de posicionamiento fino</h4>
+        <p>El "ayudo a [quién] a [resultado interno] para [resultado comercial]" en versión final. Sale natural una vez exista el método; no antes.</p>
+      </div>
+      <div class="pcard">
+        <div class="when">Fase posterior</div>
+        <h4>Funnel comercial de conversión</h4>
+        <p>El embudo de ventas —distinto al de difusión— se diseña más adelante, cuando la oferta ya esté rodando. El B2B no entra en esta hoja de ruta: queda descartado para no dispersar el foco.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  Documento de trabajo · mi arquitectura estratégica para <b>Diana</b> — resumen vivo, sujeto a iteración.
+</footer>
+
+<script>
+  function showPanel(which){
+    document.getElementById('panel-problema').classList.toggle('show', which==='problema');
+    document.getElementById('panel-enfoque').classList.toggle('show', which==='enfoque');
+    var bp=document.getElementById('btnProblema'), be=document.getElementById('btnEnfoque');
+    bp.classList.toggle('on', which==='problema'); bp.classList.toggle('problema', which==='problema');
+    be.classList.toggle('on', which==='enfoque');
+  }
+
+  var steps=[
+    {name:"Puerta de entrada", title:"Libro · 7 Estrategias para Ser Exitosa", price:"$ · accesible", depth:25,
+     role:"Primer contacto pagado",
+     desc:"La forma más fácil de entrar al mundo de Diana. Presenta el método en su versión más ligera y siembra la transformación: empezar a verse y comunicarse distinto."},
+    {name:"Escala", title:"Curso evergreen · De invisible a inolvidable", price:"$$ · autoservicio", depth:50,
+     role:"Aprendizaje a tu ritmo",
+     desc:"El método ya estructurado en lecciones. La emprendedora trabaja confianza y comunicación de forma autónoma. Escala sin consumir el tiempo de Diana."},
+    {name:"Profundidad", title:"Programa grupal · método La Diana", price:"$$$ · acompañado", depth:75,
+     role:"Transformación en grupo",
+     desc:"El método aplicado con acompañamiento y comunidad. Más hondura: se trabajan las barreras internas en vivo y se sostiene el avance entre pares."},
+    {name:"Máxima profundidad", title:"Mentoría premium 1:1 · Tu libro con propósito", price:"$$$$ · alto valor", depth:100,
+     role:"Acompañamiento personal",
+     desc:"El nivel más profundo del método, uno a uno. Culmina en el libro: la clienta cuenta su historia y da a conocer su negocio. La cúspide del recorrido."}
+  ];
+
+  function selectStep(i){
+    document.querySelectorAll('.step').forEach(function(s){ s.classList.toggle('active', +s.dataset.step===i); });
+    var d=steps[i];
+    document.getElementById('detail').innerHTML =
+      '<div class="step-name">'+d.name+'</div>'+
+      '<h3>'+d.title+'</h3>'+
+      '<div class="meta"><div>Precio<b>'+d.price+'</b></div><div>Rol<b>'+d.role+'</b></div></div>'+
+      '<div class="depth-meter"><div class="l">PROFUNDIDAD DEL MÉTODO</div><div class="bar"><i style="width:'+d.depth+'%"></i></div></div>'+
+      '<div class="desc">'+d.desc+'</div>';
+  }
+
+  selectStep(0);
+</script>
+</body>
+</html>

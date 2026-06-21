@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { ImageDown } from "lucide-react";
+import { ImageDown, Lightbulb } from "lucide-react";
 import { ModuleCard } from "@/components/module-card";
 import { PageHero } from "@/components/page-hero";
 import { ikigaiSubmodules } from "@/lib/data";
@@ -124,6 +124,10 @@ export function IkigaiOverview() {
               <ImageDown size={18} />
               {isGenerating ? "Generando..." : "Generar Ikigai en imagen"}
             </button>
+            <Link className="button ghost" href="/hallazgos-reencuadre.html">
+              <Lightbulb size={18} />
+              Hallazgos y reencuadre
+            </Link>
           </>
         }
       />
