@@ -1,5 +1,13 @@
-import { RoadmapPage } from "@/components/roadmap-page";
+import { AppShell } from "@/components/app-shell";
 
 export default function BusinessPage() {
-  return <RoadmapPage title="Business / Oferta" description="Construcción detallada de productos, servicios, pricing, promesa, entregables, bonos, objeciones y modelo operativo." />;
+  return (
+    <AppShell>
+      <iframe
+        className="business-workspace-frame"
+        src="/business-oferta.html"
+        title="Extracción del método La Diana"
+      />
+    </AppShell>
+  );
 }

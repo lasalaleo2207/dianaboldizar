@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Extracción del Método · La Diana</title>
+<style>
+  :root{
+    --azul:#0A2142; --azul-2:#13315c; --coral:#FF6B5E; --amarillo:#F5C935;
+    --verde:#2BB89B; --gris:#6b7280; --gris-claro:#eef1f6; --blanco:#fff;
+    --sombra:0 10px 30px rgba(10,33,66,.10); --sombra-fuerte:0 18px 50px rgba(10,33,66,.18);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:Arial,Helvetica,sans-serif;color:var(--azul);
+    background:linear-gradient(180deg,#f7f9fc 0%,#eef1f6 100%);line-height:1.5;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1000px;margin:0 auto;padding:0 22px}
+
+  nav{position:sticky;top:0;z-index:50;background:rgba(10,33,66,.96);backdrop-filter:blur(6px);border-bottom:3px solid var(--coral)}
+  nav .wrap{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:10px 22px}
+  nav .brand{color:#fff;font-weight:bold;font-size:15px;letter-spacing:.5px;margin-right:auto}
+  nav .brand span{color:var(--amarillo)}
+  nav a{color:#cdd6e6;text-decoration:none;font-size:12.5px;font-weight:bold;padding:7px 11px;border-radius:20px;transition:.2s;white-space:nowrap}
+  nav a:hover{background:rgba(255,255,255,.10);color:#fff}
+
+  header.hero{padding:60px 0 24px;text-align:center}
+  header.hero .kicker{display:inline-block;background:var(--amarillo);color:var(--azul);font-weight:bold;font-size:12px;letter-spacing:2px;padding:6px 14px;border-radius:30px;text-transform:uppercase}
+  header.hero h1{font-size:42px;line-height:1.07;margin:18px 0 10px;letter-spacing:-1px}
+  header.hero h1 b{color:var(--coral)}
+  header.hero p.sub{font-size:17px;color:var(--gris);max-width:680px;margin:0 auto}
+  .meta-row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:18px}
+  .meta-row span{background:#fff;box-shadow:var(--sombra);border-radius:30px;padding:8px 16px;font-size:12.5px;font-weight:bold}
+  .meta-row span i{font-style:normal;color:var(--coral)}
+
+  section{padding:38px 0}
+  .sec-label{display:flex;align-items:center;gap:12px;margin-bottom:6px}
+  .sec-num{background:var(--azul);color:#fff;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-weight:bold;font-size:15px;flex:none}
+  h2{font-size:27px;letter-spacing:-.5px}
+  .sec-desc{color:var(--gris);margin:6px 0 22px;font-size:15.5px;max-width:760px}
+
+  /* PRINCIPIOS */
+  .principios{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+  .pr{background:#fff;border-radius:16px;padding:20px;box-shadow:var(--sombra);border-left:5px solid var(--coral)}
+  .pr b{color:var(--coral)}
+  .pr h4{font-size:15.5px;margin-bottom:5px}
+  .pr p{font-size:13.5px;color:#34435c}
+
+  /* CHECKLIST PRE */
+  .checklist{background:#fff;border-radius:16px;padding:8px 22px;box-shadow:var(--sombra)}
+  .chk{display:flex;align-items:flex-start;gap:12px;padding:13px 0;border-bottom:1px solid var(--gris-claro);cursor:pointer}
+  .chk:last-child{border-bottom:0}
+  .chk input{width:20px;height:20px;margin-top:2px;accent-color:var(--coral);flex:none;cursor:pointer}
+  .chk .t{font-size:14.5px}
+  .chk .t b{display:block}
+  .chk .t small{color:var(--gris)}
+  .chk.done .t b{text-decoration:line-through;color:var(--gris)}
+
+  /* FASES */
+  .progress{background:#fff;border-radius:30px;box-shadow:var(--sombra);padding:6px;display:flex;align-items:center;gap:12px;margin-bottom:18px;font-size:13px;font-weight:bold}
+  .progress .bar{flex:1;height:10px;background:var(--gris-claro);border-radius:8px;overflow:hidden}
+  .progress .bar i{display:block;height:100%;width:0;background:var(--verde);border-radius:8px;transition:width .4s}
+  .progress .lbl{padding-left:14px;color:var(--gris)}
+  .progress .pct{padding-right:14px;color:var(--verde)}
+
+  .fase{background:#fff;border-radius:18px;box-shadow:var(--sombra);margin-bottom:14px;overflow:hidden;border-left:6px solid var(--azul)}
+  .fase.open{border-left-color:var(--coral);box-shadow:var(--sombra-fuerte)}
+  .fase-head{display:flex;align-items:center;gap:16px;padding:18px 22px;cursor:pointer;user-select:none}
+  .fase-head .fn{width:42px;height:42px;border-radius:12px;background:var(--azul);color:#fff;display:grid;place-items:center;font-weight:bold;font-size:18px;flex:none}
+  .fase.open .fase-head .fn{background:var(--coral)}
+  .fase-head .ft{flex:1}
+  .fase-head .ft h3{font-size:18px}
+  .fase-head .ft .obj{font-size:13px;color:var(--gris);margin-top:2px}
+  .fase-head .chev{font-size:18px;color:var(--gris);transition:.3s}
+  .fase.open .fase-head .chev{transform:rotate(180deg);color:var(--coral)}
+  .fase-body{display:none;padding:0 22px 22px}
+  .fase.open .fase-body{display:block;animation:fade .3s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+  .block-title{font-size:11px;font-weight:bold;letter-spacing:1.5px;text-transform:uppercase;color:var(--coral);margin:16px 0 8px;display:flex;align-items:center;gap:7px}
+  .qlist{list-style:none}
+  .qlist li{background:var(--gris-claro);border-radius:10px;padding:11px 14px;font-size:14px;margin-bottom:7px;position:relative;padding-left:34px}
+  .qlist li::before{content:"›";position:absolute;left:14px;top:9px;color:var(--coral);font-weight:bold;font-size:18px}
+  .tips{display:flex;flex-direction:column;gap:6px}
+  .tips div{font-size:13.5px;color:#34435c;padding-left:22px;position:relative}
+  .tips div::before{content:"→";position:absolute;left:0;color:var(--verde);font-weight:bold}
+  .alerta{background:#fff5f4;border:1px solid #ffd9d4;border-radius:10px;padding:12px 14px;font-size:13.5px;margin-top:14px;color:#a23b2c}
+  .alerta b{color:var(--coral)}
+  .entreg{background:#eafaf5;border:1px solid #c4ece0;border-radius:10px;padding:12px 14px;font-size:13.5px;margin-top:10px}
+  .entreg b{color:var(--verde)}
+  textarea.notes{width:100%;margin-top:14px;border:1.5px solid var(--gris-claro);border-radius:10px;padding:12px;font-family:inherit;font-size:14px;min-height:80px;resize:vertical;color:var(--azul)}
+  textarea.notes:focus{outline:none;border-color:var(--coral)}
+  .donewrap{display:flex;align-items:center;gap:9px;margin-top:12px;font-size:13.5px;font-weight:bold;cursor:pointer}
+  .donewrap input{width:19px;height:19px;accent-color:var(--verde);cursor:pointer}
+
+  /* CANVAS */
+  .canvas{background:linear-gradient(135deg,var(--azul),var(--azul-2));border-radius:20px;padding:28px;box-shadow:var(--sombra-fuerte);color:#fff}
+  .canvas .crow{margin-bottom:16px}
+  .canvas label{display:block;font-size:11px;font-weight:bold;letter-spacing:1.5px;text-transform:uppercase;color:var(--amarillo);margin-bottom:6px}
+  .canvas input,.canvas textarea{width:100%;border:0;border-radius:10px;padding:11px 13px;font-family:inherit;font-size:14px;color:var(--azul)}
+  .canvas textarea{min-height:60px;resize:vertical}
+  .stage-grid{display:grid;grid-template-columns:40px 1.4fr 1fr 110px;gap:8px;align-items:center;margin-bottom:8px}
+  .stage-grid .sl{width:38px;height:38px;border-radius:10px;background:var(--amarillo);color:var(--azul);display:grid;place-items:center;font-weight:bold;font-size:18px}
+  .stage-grid input,.stage-grid select{padding:9px 10px;border-radius:8px;border:0;font-size:13px;font-family:inherit;color:var(--azul);width:100%}
+  .stage-head{display:grid;grid-template-columns:40px 1.4fr 1fr 110px;gap:8px;font-size:10px;font-weight:bold;letter-spacing:1px;text-transform:uppercase;color:#aebbd2;margin-bottom:6px}
+  .btnrow{display:flex;gap:10px;margin-top:20px;flex-wrap:wrap}
+  .btn{border:0;font-family:inherit;font-weight:bold;font-size:13.5px;padding:11px 18px;border-radius:30px;cursor:pointer;transition:.2s}
+  .btn.print{background:var(--amarillo);color:var(--azul)}
+  .btn.clear{background:transparent;color:#aebbd2;border:1.5px solid rgba(255,255,255,.3)}
+  .btn:hover{transform:translateY(-2px)}
+  .saved-note{text-align:center;font-size:12.5px;color:var(--gris);margin-top:14px}
+  .saved-note b{color:var(--verde)}
+
+  footer{background:var(--azul);color:#aebbd2;text-align:center;padding:28px;font-size:13px;margin-top:36px}
+  footer b{color:var(--amarillo)}
+
+  @media(max-width:760px){
+    body{overflow-x:hidden}
+    .wrap{width:100%;padding-left:18px;padding-right:18px}
+    nav .wrap{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px}
+    nav a{font-size:11px;padding:6px 4px;text-align:center;white-space:normal}
+    nav .brand{grid-column:1/-1}
+    header.hero h1{max-width:100%;font-size:27px;overflow-wrap:anywhere}
+    header.hero p.sub{font-size:16px}
+    h1,h2,h3,h4,p,.pr,.chk .t,.qlist li,.tips div{overflow-wrap:anywhere}
+    .meta-row span{max-width:100%;white-space:normal;text-align:center}
+    .principios{grid-template-columns:minmax(0,1fr)}
+    .pr{min-width:0;overflow-wrap:anywhere}
+    .canvas{padding:20px 16px}
+    .stage-grid,.stage-head{grid-template-columns:34px minmax(0,1fr)}
+    .stage-grid > *{min-width:0}
+    .stage-head{display:none}
+    nav .brand{width:100%;margin-bottom:6px}
+  }
+  @media print{
+    nav,.btnrow,.progress,.donewrap{display:none}
+    .fase-body{display:block!important}
+    body{background:#fff}
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <div class="brand">EXTRACCIÓN DEL MÉTODO · <span>La Diana</span></div>
+    <a href="#principios">Reglas</a>
+    <a href="#operaciones">Operaciones</a>
+    <a href="#antes">Antes</a>
+    <a href="#fases">Las fases</a>
+    <a href="#tecnicas">Técnicas</a>
+    <a href="#canvas">El canvas</a>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap">
+    <span class="kicker">Nuestra sesión de trabajo</span>
+    <h1>Vamos a sacar <b>tu</b> método,<br>Diana — no a inventarlo</h1>
+    <p class="sub">Esta es la sesión en la que mapeo tu método: qué ya haces y funciona, qué sabes pero no has sistematizado, y qué falta por construir. Yo te guío con las preguntas, tú me cuentas, y al final armamos juntas tu canvas.</p>
+    <div class="meta-row">
+      <span><i>⏱</i> 75–90 min</span>
+      <span><i>👤</i> Yo te guío · tú me cuentas</span>
+      <span><i>🎙</i> Grabamos la sesión</span>
+      <span><i>💾</i> Mis notas se guardan en este navegador</span>
+    </div>
+  </div>
+</header>
+
+<!-- PRINCIPIOS -->
+<section id="principios">
+  <div class="wrap">
+    <div class="sec-label"><div class="sec-num">★</div><h2>Las 4 reglas del juego</h2></div>
+    <p class="sec-desc">Mis reglas antes de empezar. Son la diferencia entre sacar un método auténtico y fabricar otro framework genérico de coaching.</p>
+    <div class="principios">
+      <div class="pr"><h4>1. Extraer · aflorar · construir</h4><p>No todo el método existe ya. Parte se <b>extrae</b> de lo que Diana hace hoy (su trabajo interior), parte se <b>aflora</b> de lo que sabe pero no ha sistematizado (su comunicación), y el puente que falta se <b>construye</b> — siempre sobre fortalezas reales, nunca desde la imaginación.</p></div>
+      <div class="pr"><h4>2. Anclado al nicho</h4><p>Todo se mide contra el ancla: <b>romper la barrera interna que la tiene invisible para que comunique y venda lo que vale</b>. Si un paso no aporta a eso, sobra.</p></div>
+      <div class="pr"><h4>3. El arco viaja de adentro hacia afuera</h4><p>Empieza en lo interior (confianza, creencias) y <b>termina afuera</b>: visible, comunicando, vendiendo, contando su historia. Si termina en un estado mental, es autoayuda.</p></div>
+      <div class="pr"><h4>4. La prueba del intercambio</h4><p>Si cualquier otra coach pudiera ponerle su nombre al método y funcionaría igual, es genérico. El diferenciador no está en cuántos pasos son de venta, sino en lo que <b>solo Diana</b> hace al llevar a la clienta de lo interior a lo exterior.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- OPERACIONES -->
+<section id="operaciones" style="background:#fff">
+  <div class="wrap">
+    <div class="sec-label"><div class="sec-num">◆</div><h2>Qué espero encontrar (y qué no)</h2></div>
+    <p class="sec-desc">Riesgo real: hoy el método de Diana es casi todo interior. La mitad exterior —comunicar, mostrarse, vender— quizá no exista todavía para extraer. Por eso esta sesión no busca "sacar un método terminado": busca mapear el terreno en tres partes.</p>
+    <div class="principios">
+      <div class="pr"><h4>① Extraer</h4><p>Lo que Diana ya hace y funciona. Casi seguro su <b>trabajo interior</b>. Está, se saca tal cual de sus casos reales.</p></div>
+      <div class="pr" style="border-left-color:var(--amarillo)"><h4>② Aflorar</h4><p>Lo que sabe pero no ha sistematizado con estas clientas: su <b>expertise en comunicación</b>. No se inventa — se formaliza algo que ya tiene en bruto.</p></div>
+      <div class="pr" style="border-left-color:var(--verde)"><h4>③ Construir</h4><p>El <b>puente</b> de lo interior a lo exterior, y lo que falte. Esto sí se diseña, pero anclado a sus fortalezas reales.</p></div>
+    </div>
+    <div class="alerta" style="margin-top:16px">🚩 <b>La pregunta de fondo no es de redacción, es de entrega:</b> ¿Diana hoy puede de verdad producir el resultado exterior, o le estaría prometiendo a la clienta algo que no sabe entregar? Si no puede aún, no fuerzo la promesa: la <b>escalo</b> a lo que sí entrega hoy ("rompo tu barrera interna y aprendes a comunicar tu valor") y dejo "vender más" como la etapa que se gana después.</div>
+  </div>
+</section>
+
+<!-- ANTES -->
+<section id="antes" style="background:#fff">
+  <div class="wrap">
+    <div class="sec-label"><div class="sec-num">0</div><h2>Antes de la sesión</h2></div>
+    <p class="sec-desc">Mi checklist de preparación. Lo voy marcando a medida que lo cumplo.</p>
+    <div class="checklist" id="precheck"></div>
+  </div>
+</section>
+
+<!-- FASES -->
+<section id="fases">
+  <div class="wrap">
+    <div class="sec-label"><div class="sec-num">▶</div><h2>Las 6 fases de extracción</h2></div>
+    <p class="sec-desc">Sigo el orden. Cada fase tiene su banco de preguntas, cómo profundizar, la señal de alerta que vigilo y un espacio para mis notas. Marco «fase lista» cuando tengo el entregable.</p>
+
+    <div class="progress">
+      <span class="lbl">Avance de la sesión</span>
+      <div class="bar"><i id="progbar"></i></div>
+      <span class="pct" id="progpct">0%</span>
+    </div>
+
+    <div id="fasescont"></div>
+  </div>
+</section>
+
+<!-- TECNICAS -->
+<section id="tecnicas" style="background:#fff">
+  <div class="wrap">
+    <div class="sec-label"><div class="sec-num">⚑</div><h2>Cómo guío la conversación</h2></div>
+    <p class="sec-desc">Diana va a tender a contarme resultados y conceptos abstractos. Mi trabajo es perseguir el <i>cómo</i> concreto. Estas son mis herramientas.</p>
+    <div class="principios">
+      <div class="pr" style="border-left-color:var(--verde)"><h4>Muéstrame, no me cuentes</h4><p>Ante cualquier idea general, le pido el caso: <b>"dame un ejemplo de una clienta con la que hiciste eso"</b>. Sin ejemplo, no hay método.</p></div>
+      <div class="pr" style="border-left-color:var(--verde)"><h4>El "¿y luego qué?" en bucle</h4><p>Para reconstruir secuencias, repito <b>"¿y después de eso, qué hiciste?"</b> hasta llegar al resultado. Cada respuesta es un paso del método.</p></div>
+      <div class="pr" style="border-left-color:var(--verde)"><h4>Cazo abstracciones</h4><p>Cuando dice "empoderar", "alinear", "que brille" → le devuelvo <b>"¿y eso en concreto qué significa que hiciste?"</b>. Las palabras bonitas esconden los pasos reales.</p></div>
+      <div class="pr" style="border-left-color:var(--verde)"><h4>Separo el qué del cómo</h4><p>Ella me dirá el resultado ("ganó confianza"). Yo persigo el método: <b>"¿qué hiciste TÚ para que eso pasara?"</b>. El método está en lo que ella hace, no en lo que la clienta siente.</p></div>
+      <div class="pr" style="border-left-color:var(--verde)"><h4>Uso el silencio</h4><p>Después de una pregunta difícil, callo y la dejo pensar. No relleno el vacío — las mejores respuestas salen del silencio incómodo.</p></div>
+      <div class="pr" style="border-left-color:var(--verde)"><h4>Grabo y vuelvo</h4><p>No intento capturar todo en vivo. <b>Grabo</b> y extraigo el literal después. En la sesión me concentro en profundizar, no en transcribir.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- CANVAS -->
+<section id="canvas">
+  <div class="wrap">
+    <div class="sec-label"><div class="sec-num">✓</div><h2>El canvas del método</h2></div>
+    <p class="sec-desc">Mi entregable final. Lo voy llenando con lo que sale de las fases. Al cerrar, este es el método de Diana, listo para calzar en DIANA y desarrollarlo.</p>
+    <div class="canvas">
+      <div class="crow"><label>Nombre del método</label><input data-k="c_nombre" placeholder="Ej: El Método La Diana"></div>
+      <div class="crow"><label>Público / ancla (a quién y para qué)</label><input data-k="c_ancla" placeholder="Romper la barrera interna que te tiene invisible para que comuniques y vendas lo que vales como emprendedora"></div>
+
+      <div class="crow">
+        <label>Las etapas (de adentro hacia afuera)</label>
+        <div class="stage-head"><span></span><span>Nombre de la etapa · qué hace la clienta</span><span>Resultado / entregable</span><span>Tipo</span></div>
+        <div id="stages"></div>
+      </div>
+
+      <div class="crow"><label>El diferenciador · la salsa secreta</label><textarea data-k="c_dif" placeholder="Eso que Diana hace y nadie más — lo que rompe la prueba del intercambio"></textarea></div>
+      <div class="crow"><label>Resultado final (debe ser comercial, no un estado interno)</label><input data-k="c_final" placeholder="Ej: lanza su oferta / sube precios / publica su libro / consigue clientas"></div>
+      <div class="crow"><label>Alcance de la promesa · qué entrego hoy / qué se gana después</label><textarea data-k="c_alcance" placeholder="Si el resultado comercial no es entregable hoy: qué prometo ahora y qué dejo como etapa posterior"></textarea></div>
+      <div class="crow"><label>¿Pasa la prueba del intercambio? ¿Por qué?</label><textarea data-k="c_test" placeholder="Si le pones otro nombre, ¿sigue siendo único? Si no, vuelve a la fase 4."></textarea></div>
+
+      <div class="btnrow">
+        <button class="btn print" onclick="window.print()">🖨 Imprimir / Guardar PDF</button>
+        <button class="btn clear" onclick="limpiar()">Borrar todas las notas</button>
+      </div>
+      <div class="saved-note">💾 Todo lo que escribo se guarda automáticamente <b>en este navegador</b>. Cierro y vuelvo cuando quiera.</div>
+    </div>
+  </div>
+</section>
+
+<footer>Guía de facilitación · extracción del método de <b>Diana</b> — documento de trabajo, sujeto a iteración.</footer>
+
+<script>
+/* ---------- DATA ---------- */
+var preItems=[
+  ["Tengo el ancla a la vista","Romper la barrera interna → comunicar y vender. Es mi filtro para todo."],
+  ["Le pido a Diana 3 casos reales","Que llegue pensando en 3 clientas que llevó de invisible a vendiendo. Con nombre (o alias)."],
+  ["Bloqueo 75–90 min sin interrupciones","La extracción necesita profundidad; no la hago en 30 min entre cosas."],
+  ["Pido permiso y grabo","Extraigo el literal después. En vivo me concentro en preguntar, no en escribir todo."],
+  ["Tengo mi guía abierta","Y le aviso a Diana que voy a insistir y repreguntar — es parte del proceso, no un interrogatorio."]
+];
+
+var fases=[
+  {n:1,t:"Casos reales",obj:"Conseguir materia prima concreta: historias, no teoría.",
+   q:["Pensemos en 3 clientas concretas que llegaron sintiéndose invisibles o estancadas y que lograron mostrarse y vender. Nómbralas (aunque sea un alias).",
+      "¿En qué estado exacto llegó cada una? ¿Qué decía, qué no se atrevía a hacer, cómo estaba su negocio?",
+      "¿Cuál fue el resultado tangible al final de cada una? (más clientas, subió precios, lanzó algo, contó su historia…)",
+      "De todas, ¿cuál es tu caso de mayor orgullo? ¿Por qué ese?",
+      "Y después de trabajar contigo, ¿qué pasó con cada una? ¿Se comunicó mejor, se mostró más, vendió más… aunque no fuera el foco explícito?"],
+   tips:["Insisto en nombres y situaciones específicas, no en perfiles genéricos.",
+         "Si menciona muchas, elijo las 3 más distintas entre sí — eso me ayuda a encontrar el patrón después.",
+         "La última pregunta busca resultados exteriores latentes: a veces ya pasan, pero Diana nunca los nombró ni se los atribuyó."],
+   alerta:"Si me responde en general (\"les ayudo a brillar\", \"a creer en ellas\"), le pido un nombre y un caso. <b>Sin caso concreto no hay extracción.</b>",
+   ent:"3 casos reales, con estado inicial, resultado final y qué pasó después (resultados exteriores latentes)."},
+
+  {n:2,t:"Reconstrucción paso a paso",obj:"Sacar la secuencia real de lo que Diana HACE, caso por caso.",
+   q:["Rebobinemos al día 1 con [clienta]. ¿Qué fue lo PRIMERO que hiciste o le preguntaste?",
+      "¿Y después de eso, qué? Llévame paso por paso, como una película, hasta el resultado.",
+      "¿Hubo un momento de quiebre, un clic donde algo cambió en ella? ¿Qué hiciste justo ahí?",
+      "¿Qué le ponías a hacer entre sesiones? ¿Qué ejercicios o tareas?",
+      "Si una clienta se saltara uno de esos pasos, ¿se cae el resultado? ¿Cuál es imprescindible?"],
+   tips:["La hago narrar en orden cronológico, no en conceptos.",
+         "Repito el caso completo con al menos 2 de las 3 clientas. La repetición me revela el patrón.",
+         "Cuando salta a la conclusión, se la devuelvo: \"¿pero qué HICISTE para que eso pasara?\""],
+   alerta:"Si dice \"y ahí ya ganó confianza\" sin explicar cómo, me detengo y persigo el cómo. <b>El método está en sus acciones, no en el resultado.</b>",
+   ent:"La secuencia paso a paso reconstruida para 2–3 casos."},
+
+  {n:3,t:"El patrón",obj:"Comparar los casos y encontrar la columna vertebral que se repite.",
+   q:["Mirando los 3 casos juntos, ¿qué pasos se repiten en todos?",
+      "¿En qué orden tienden a pasar siempre?",
+      "¿Qué haces en todos los casos casi sin pensarlo, porque te sale natural?",
+      "Si tuvieras que enseñarle tu proceso a otra persona para que lo replique, ¿cuáles serían los grandes bloques?"],
+   tips:["Escribo los pasos comunes en tarjetas/post-its y los ordeno con ella.",
+         "Apunto a 4–6 bloques. Más de 6 es difícil de recordar y vender.",
+         "Es normal que casi todo lo que salga aquí sea interior — el mundo exterior lo trabajo en la fase siguiente."],
+   alerta:"Cuidado con forzar pasos que solo aparecieron en un caso. <b>El patrón es lo que se repite</b>, no lo excepcional.",
+   ent:"Una secuencia borrador de 4–6 bloques (la columna del método)."},
+
+  {n:4,t:"El mundo exterior: comunicación y entrega",obj:"Aflorar la expertise de comunicación de Diana y verificar si puede producir el resultado exterior.",
+   q:["Fuera del coaching, ¿qué sabes hacer en comunicación que la mayoría no? ¿De dónde viene esa competencia?",
+      "Cuando una clienta necesita mostrarse, comunicar su valor o vender, ¿qué le enseñas o le pones a hacer en concreto? (aunque no sea parte formal de tu método)",
+      "¿Tienes algún caso donde sí ayudaste a alguien a comunicarse o venderse mejor, no solo a sentirse mejor?",
+      "Con total honestidad: el resultado de \"vender más / conseguir clientas\", ¿lo puedes entregar hoy, o todavía es algo que tendrías que construir?"],
+   tips:["Aquí separo lo que Diana SABE (su expertise) de lo que YA APLICA con clientas: lo primero se aflora, lo segundo se extrae.",
+         "La última pregunta es incómoda pero clave. Necesito la verdad, no la respuesta optimista."],
+   alerta:"Si no hay nada exterior ni en su práctica ni en su expertise, no invento la mitad que falta: <b>escalo la promesa</b> a lo que sí entrega hoy y dejo lo comercial como etapa posterior.",
+   ent:"Mapa de su competencia exterior: qué aflorar, qué construir, y si la promesa comercial es entregable hoy o se escala."},
+
+  {n:5,t:"La salsa secreta",obj:"Encontrar el diferenciador que rompe la prueba del intercambio.",
+   q:["¿Qué haces tú que otras coaches o consultoras NO hacen?",
+      "¿Qué crees que pasa en tus sesiones que no pasaría con otra persona?",
+      "¿Qué te dicen tus clientas que les sorprendió, o que nadie les había hecho antes?",
+      "¿Tienes algún enfoque o creencia medio contracorriente, que defiendes aunque otros no lo hagan?",
+      "¿Cuál es tu sello — eso que si te lo quitan, ya no eres tú dando la sesión?"],
+   tips:["Esta es la fase que más diferencia el método. Le doy tiempo.",
+         "Busco lo que a ella le parece \"obvio\" — muchas veces el diferenciador está en lo que da por sentado."],
+   alerta:"Si la respuesta podría decirla cualquier coach (\"escucho de verdad\", \"creo en ellas\"), <b>sigo cavando</b>. Lo genérico no diferencia.",
+   ent:"El diferenciador articulado en 1–2 frases concretas."},
+
+  {n:6,t:"El arco interior → afuera",obj:"Ordenar el método para que viaje de lo interno a lo comercial y decidir el alcance de la promesa.",
+   q:["De los bloques que sacamos, ¿cuáles son trabajo interior y cuáles son comunicación / visibilidad / venta?",
+      "Etiqueta cada bloque: ¿esto lo EXTRAIGO (ya lo hace), lo AFLORO (lo sabe) o lo CONSTRUYO (falta)?",
+      "¿El proceso termina en un resultado de negocio concreto, o termina en un estado interno? (debe terminar afuera)",
+      "¿En qué momento exacto la clienta pasa de \"trabajar en ella\" a \"mostrarse y vender\"? Ese puente es clave.",
+      "¿La promesa final es entregable con lo que hay hoy, o la escalo a una versión más chica y verdadera?"],
+   tips:["Pinto los bloques de dos colores: interior vs comunicación/venta, para ver hasta dónde llega el arco.",
+         "Si todo es interior, me falta el exterior: vuelvo a la fase 4 a aflorar o a decidir qué construyo.",
+         "La regla no es '50% de venta'; es que el arco LLEGUE a un resultado exterior, en la proporción que dé la fortaleza real de Diana."],
+   alerta:"Si el último paso es un sentimiento (\"se siente segura\"), <b>el arco no cierra</b>. Empujo un paso más hasta el resultado comercial.",
+   ent:"La secuencia ordenada inicio→fin, cada bloque etiquetado (extraer/aflorar/construir) y el alcance de la promesa decidido."},
+
+  {n:7,t:"Nombrar y calzar en DIANA",obj:"Ponerle nombre a las etapas y validar la marca.",
+   q:["Ponle un nombre a cada etapa. Mejor un verbo de acción que un concepto abstracto.",
+      "¿Las etapas calzan naturalmente en D-I-A-N-A? Si forzar el acrónimo las vuelve genéricas, cede el acrónimo, no el método.",
+      "Prueba del intercambio: ¿podría cualquier coach ponerle su nombre y funcionar igual? Si sí, falta diferenciador → vuelve a la fase 5.",
+      "¿El nombre de cada etapa promete algo que la clienta quiere, o suena a terapia?"],
+   tips:["El acrónimo es un plus, no la meta. Un método claro sin acrónimo perfecto vale más que un DIANA forzado y genérico.",
+         "Pruebo los nombres en voz alta: ¿una emprendedora pagaría por pasar por esa etapa?"],
+   alerta:"No sacrifico claridad por hacer calzar las letras. <b>Primero el método correcto, después el acrónimo.</b>",
+   ent:"Etapas nombradas + validación de la prueba del intercambio. Listo para el canvas."}
+];
+
+/* ---------- RENDER ---------- */
+var store={};
+try{store=JSON.parse(localStorage.getItem('diana_extract')||'{}')}catch(e){store={}}
+function save(){localStorage.setItem('diana_extract',JSON.stringify(store))}
+function val(k){return store[k]||''}
+
+// precheck
+var pc=document.getElementById('precheck');
+preItems.forEach(function(it,i){
+  var k='pre_'+i, on=store[k]==1;
+  var d=document.createElement('label');
+  d.className='chk'+(on?' done':'');
+  d.innerHTML='<input type="checkbox" '+(on?'checked':'')+'><div class="t"><b>'+it[0]+'</b><small>'+it[1]+'</small></div>';
+  d.querySelector('input').addEventListener('change',function(e){
+    store[k]=e.target.checked?1:0; save(); d.classList.toggle('done',e.target.checked);
+  });
+  pc.appendChild(d);
+});
+
+// fases
+var cont=document.getElementById('fasescont');
+fases.forEach(function(f){
+  var k='fase_'+f.n, done=store['done_'+f.n]==1;
+  var el=document.createElement('div'); el.className='fase';
+  var ql=f.q.map(function(q){return '<li>'+q+'</li>'}).join('');
+  var tl=f.tips.map(function(t){return '<div>'+t+'</div>'}).join('');
+  el.innerHTML=
+    '<div class="fase-head"><div class="fn">'+f.n+'</div>'+
+      '<div class="ft"><h3>'+f.t+'</h3><div class="obj">'+f.obj+'</div></div>'+
+      '<div class="chev">▾</div></div>'+
+    '<div class="fase-body">'+
+      '<div class="block-title">🎯 Banco de preguntas</div><ul class="qlist">'+ql+'</ul>'+
+      '<div class="block-title">🔍 Para profundizar</div><div class="tips">'+tl+'</div>'+
+      '<div class="alerta">🚩 <b>Señal de alerta:</b> '+f.alerta+'</div>'+
+      '<div class="entreg">✅ <b>Entregable de la fase:</b> '+f.ent+'</div>'+
+      '<textarea class="notes" data-k="'+k+'" placeholder="Tus notas de esta fase…">'+val(k)+'</textarea>'+
+      '<label class="donewrap"><input type="checkbox" data-done="'+f.n+'" '+(done?'checked':'')+'> Marcar esta fase como lista</label>'+
+    '</div>';
+  // toggle
+  el.querySelector('.fase-head').addEventListener('click',function(){el.classList.toggle('open')});
+  cont.appendChild(el);
+});
+
+// bind textareas + inputs (notes & canvas)
+function bind(){
+  document.querySelectorAll('[data-k]').forEach(function(node){
+    var saved=val(node.dataset.k);
+    if(saved!=='') node.value=saved;
+    node.addEventListener('input',function(){store[node.dataset.k]=node.value;save()});
+  });
+  document.querySelectorAll('[data-done]').forEach(function(cb){
+    cb.addEventListener('change',function(){store['done_'+cb.dataset.done]=cb.checked?1:0;save();updateProgress()});
+  });
+}
+
+// canvas stages
+var stagesHost=document.getElementById('stages');
+['D','I','A','N','A'].forEach(function(letter,i){
+  var row=document.createElement('div'); row.className='stage-grid';
+  var tipo=val('st_tipo_'+i)||'interior';
+  row.innerHTML='<div class="sl">'+letter+'</div>'+
+    '<input data-k="st_name_'+i+'" placeholder="Nombre · qué hace la clienta" value="'+val('st_name_'+i).replace(/"/g,'&quot;')+'">'+
+    '<input data-k="st_res_'+i+'" placeholder="Resultado" value="'+val('st_res_'+i).replace(/"/g,'&quot;')+'">'+
+    '<select data-k="st_tipo_'+i+'">'+
+      '<option value="interior"'+(tipo=='interior'?' selected':'')+'>Interior</option>'+
+      '<option value="comunica"'+(tipo=='comunica'?' selected':'')+'>Comunica/Vende</option>'+
+    '</select>';
+  stagesHost.appendChild(row);
+});
+
+bind();
+
+function updateProgress(){
+  var done=0; fases.forEach(function(f){if(store['done_'+f.n]==1)done++});
+  var pct=Math.round(done/fases.length*100);
+  document.getElementById('progbar').style.width=pct+'%';
+  document.getElementById('progpct').textContent=pct+'%';
+}
+updateProgress();
+
+function limpiar(){
+  if(confirm('¿Borrar todas las notas y empezar de cero?')){
+    localStorage.removeItem('diana_extract'); location.reload();
+  }
+}
+</script>
+</body>
+</html>
