@@ -160,7 +160,7 @@
       <span><i>⏱</i> 75–90 min</span>
       <span><i>👤</i> Yo te guío · tú me cuentas</span>
       <span><i>🎙</i> Grabamos la sesión</span>
-      <span><i>💾</i> Mis notas se guardan en este navegador</span>
+      <span><i>💾</i> Mis notas se guardan en la base de datos</span>
     </div>
   </div>
 </header>
@@ -258,7 +258,7 @@
         <button class="btn print" onclick="window.print()">🖨 Imprimir / Guardar PDF</button>
         <button class="btn clear" onclick="limpiar()">Borrar todas las notas</button>
       </div>
-      <div class="saved-note">💾 Todo lo que escribo se guarda automáticamente <b>en este navegador</b>. Cierro y vuelvo cuando quiera.</div>
+      <div class="saved-note" id="save-status">💾 Conectando con la base de datos...</div>
     </div>
   </div>
 </section>
@@ -357,8 +357,64 @@ var fases=[
 
 /* ---------- RENDER ---------- */
 var store={};
-try{store=JSON.parse(localStorage.getItem('diana_extract')||'{}')}catch(e){store={}}
-function save(){localStorage.setItem('diana_extract',JSON.stringify(store))}
+var authToken='';
+var saveTimer=null;
+var loaded=false;
+var legacyStore={};
+try{legacyStore=JSON.parse(localStorage.getItem('diana_extract')||'{}')}catch(error){legacyStore={}}
+
+function setStatus(message,isError){
+  var status=document.getElementById('save-status');
+  status.textContent='💾 '+message;
+  status.style.color=isError?'var(--coral)':'var(--gris)';
+}
+
+function save(){
+  if(!loaded)return;
+  clearTimeout(saveTimer);
+  setStatus('Guardando en la base de datos...');
+  saveTimer=setTimeout(function(){saveRemote()},500);
+}
+
+async function saveRemote(){
+  if(!authToken){setStatus('Esperando una sesión válida...',true);return false}
+  try{
+    var response=await fetch('/api/business-methodology',{
+      method:'PUT',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+authToken},
+      body:JSON.stringify({data:store})
+    });
+    var result=await response.json();
+    if(!response.ok)throw new Error(result.error||'No se pudo guardar');
+    setStatus('Guardado en la base de datos');
+    return true;
+  }catch(error){
+    setStatus(error.message||'No se pudo guardar',true);
+    return false;
+  }
+}
+
+async function loadRemote(){
+  setStatus('Cargando desde la base de datos...');
+  try{
+    var response=await fetch('/api/business-methodology',{
+      headers:{'Authorization':'Bearer '+authToken}
+    });
+    var result=await response.json();
+    if(!response.ok)throw new Error(result.error||'No se pudo cargar');
+    var remoteData=result.data&&typeof result.data==='object'?result.data:{};
+    var shouldMigrate=Object.keys(remoteData).length===0&&Object.keys(legacyStore).length>0;
+    store=shouldMigrate?legacyStore:remoteData;
+    loaded=true;
+    applyStoreToUI();
+    if(shouldMigrate)await saveRemote();
+    else setStatus('Guardado en la base de datos');
+    localStorage.removeItem('diana_extract');
+  }catch(error){
+    setStatus(error.message||'No se pudo cargar',true);
+  }
+}
+
 function val(k){return store[k]||''}
 
 // precheck
@@ -427,6 +483,21 @@ var stagesHost=document.getElementById('stages');
 
 bind();
 
+function applyStoreToUI(){
+  document.querySelectorAll('[data-k]').forEach(function(node){
+    node.value=val(node.dataset.k)||(node.tagName==='SELECT'?'interior':'');
+  });
+  document.querySelectorAll('#precheck input').forEach(function(checkbox,index){
+    var checked=store['pre_'+index]==1;
+    checkbox.checked=checked;
+    checkbox.closest('.chk').classList.toggle('done',checked);
+  });
+  document.querySelectorAll('[data-done]').forEach(function(checkbox){
+    checkbox.checked=store['done_'+checkbox.dataset.done]==1;
+  });
+  updateProgress();
+}
+
 function updateProgress(){
   var done=0; fases.forEach(function(f){if(store['done_'+f.n]==1)done++});
   var pct=Math.round(done/fases.length*100);
@@ -435,11 +506,23 @@ function updateProgress(){
 }
 updateProgress();
 
-function limpiar(){
+async function limpiar(){
   if(confirm('¿Borrar todas las notas y empezar de cero?')){
-    localStorage.removeItem('diana_extract'); location.reload();
+    store={};
+    loaded=true;
+    applyStoreToUI();
+    await saveRemote();
   }
 }
+
+window.addEventListener('message',function(event){
+  if(event.origin!==window.location.origin||event.data?.type!=='business-methodology:auth')return;
+  authToken=event.data.accessToken||'';
+  if(authToken)loadRemote();
+  else setStatus('La sesión no está disponible. Recarga la página.',true);
+});
+
+window.parent.postMessage({type:'business-methodology:ready'},window.location.origin);
 </script>
 </body>
 </html>
