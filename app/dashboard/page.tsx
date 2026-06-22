@@ -1,12 +1,91 @@
+"use client";
+
 import Link from "next/link";
 import { CalendarDays, CheckCircle2, Files, ListTodo } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 import { AppShell } from "@/components/app-shell";
 import { DataTable } from "@/components/data-table";
 import { ModuleCard } from "@/components/module-card";
 import { PageHero } from "@/components/page-hero";
-import { decisions, deliverables, modules, project, sessions, tasks } from "@/lib/data";
+import { decisions, deliverables, modules, project, sessions, tasks, type Status } from "@/lib/data";
+import { calculateIkigaiProgress, loadIkigaiDataRemote } from "@/lib/ikigai-store";
+import { createSupabaseBrowserClient } from "@/lib/supabase";
 
 export default function DashboardPage() {
+  const [moduleProgress, setModuleProgress] = useState<Record<string, number>>({});
+  const [progressLoaded, setProgressLoaded] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+
+    async function loadProgress() {
+      try {
+        const ikigaiData = await loadIkigaiDataRemote();
+        const nextProgress: Record<string, number> = {
+          "/modules/ikigai-clarity": calculateIkigaiProgress(ikigaiData)
+        };
+
+        const supabase = createSupabaseBrowserClient();
+        if (supabase) {
+          const {
+            data: { user }
+          } = await supabase.auth.getUser();
+
+          if (user) {
+            const { data: currentProject } = await supabase
+              .from("projects")
+              .select("id")
+              .eq("name", project.name)
+              .maybeSingle();
+
+            if (currentProject?.id) {
+              const { data: methodology } = await supabase
+                .from("diagnostic_answers")
+                .select("answer")
+                .eq("project_id", currentProject.id)
+                .is("submodule_id", null)
+                .eq("question_key", "business_methodology_extraction")
+                .order("updated_at", { ascending: false })
+                .limit(1)
+                .maybeSingle();
+
+              nextProgress["/modules/business"] = calculateBusinessProgress(methodology?.answer);
+            }
+          }
+        }
+
+        if (active) setModuleProgress(nextProgress);
+      } catch (error) {
+        console.error("Dashboard progress load failed", error);
+      } finally {
+        if (active) setProgressLoaded(true);
+      }
+    }
+
+    void loadProgress();
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const roadmapModules = useMemo(
+    () => modules.map((module) => {
+      const progress = moduleProgress[module.slug] ?? module.progress;
+      return { ...module, progress, status: getProgressStatus(progress) };
+    }),
+    [moduleProgress]
+  );
+  const globalProgress = Math.round(
+    roadmapModules.reduce((total, module) => total + module.progress, 0) / roadmapModules.length
+  );
+  const completedModules = roadmapModules.filter((module) => module.progress === 100).length;
+  const currentModuleIndex = roadmapModules.findIndex((module) => module.progress < 100);
+  const currentModule = currentModuleIndex === -1 ? null : roadmapModules[currentModuleIndex];
+  const currentPhaseNumber = currentModule
+    ? String(currentModuleIndex + 1).padStart(2, "0")
+    : String(roadmapModules.length).padStart(2, "0");
+  const projectStatus = getProgressStatus(globalProgress);
+
   return (
     <AppShell>
       <div className="page-stack">
@@ -16,8 +95,8 @@ export default function DashboardPage() {
           description="Un lugar único para consultar avances, completar ejercicios, registrar decisiones, visualizar entregables y mantener trazabilidad de la estrategia."
           image="/assets/banner.png"
           variant="banner"
-          status={project.status}
-          progress={project.progress}
+          status={projectStatus}
+          progress={globalProgress}
           actions={
             <>
               <Link className="button" href="/modules/ikigai-clarity">Entrar a Ikigai</Link>
@@ -29,13 +108,13 @@ export default function DashboardPage() {
         <section className="grid cols-4">
           <article className="card metric-card">
             <span className="metric-label">Fase actual</span>
-            <div className="metric-value">00</div>
-            <p>{project.currentPhase}</p>
+            <div className="metric-value">{currentPhaseNumber}</div>
+            <p>{currentModule?.name ?? "Proyecto completado"}</p>
           </article>
           <article className="card metric-card">
             <span className="metric-label">Progreso global</span>
-            <div className="metric-value">{project.progress}%</div>
-            <p>Proyecto listo para iniciar carga de información.</p>
+            <div className="metric-value">{globalProgress}%</div>
+            <p>{progressLoaded ? `${completedModules} de ${roadmapModules.length} módulos completados.` : "Sincronizando avance..."}</p>
           </article>
           <article className="card metric-card">
             <span className="metric-label">Tareas abiertas</span>
@@ -56,7 +135,7 @@ export default function DashboardPage() {
           </div>
         </section>
         <section className="grid cols-3">
-          {modules.map((module) => (
+          {roadmapModules.map((module) => (
             <ModuleCard
               key={module.slug}
               name={module.name}
@@ -162,4 +241,24 @@ export default function DashboardPage() {
       </div>
     </AppShell>
   );
+}
+
+function getProgressStatus(progress: number): Status {
+  if (progress === 100) return "Completado";
+  if (progress > 0) return "En proceso";
+  return "No iniciado";
+}
+
+function calculateBusinessProgress(answer: string | null | undefined) {
+  if (!answer) return 0;
+
+  try {
+    const data = JSON.parse(answer) as Record<string, unknown>;
+    const completed = Array.from({ length: 7 }, (_, index) => data[`done_${index + 1}`] === 1)
+      .filter(Boolean)
+      .length;
+    return Math.round((completed / 7) * 100);
+  } catch {
+    return 0;
+  }
 }

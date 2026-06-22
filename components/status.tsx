@@ -9,7 +9,8 @@ const statusClass: Record<string, string> = {
   Pendiente: "yellow",
   "Borrador": "blue",
   "Provisional": "yellow",
-  "Completada": "green"
+  "Completada": "green",
+  "Completado": "green"
 };
 
 export function StatusChip({ status }: { status: Status | string }) {

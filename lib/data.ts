@@ -15,7 +15,7 @@ import {
   Users
 } from "lucide-react";
 
-export type Status = "No iniciado" | "En proceso" | "En revisión" | "Validado" | "Cerrado";
+export type Status = "No iniciado" | "En proceso" | "En revisión" | "Validado" | "Cerrado" | "Completado";
 
 export const project = {
   name: "Centro de Control Estratégico",
